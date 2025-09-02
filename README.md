@@ -1,2 +1,3 @@
-# HelensvaleConnect
-The future of MarketPlaces for Businesses
+# Helensvale Connect
+
+This is the README for the Helensvale Connect project.
