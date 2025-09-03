@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "jest"
+    "test": "jest",
+    "seed": "node scripts/seed.js seed",
+    "seed:clear": "node scripts/seed.js clear",
+    "seed:reset": "node scripts/seed.js reset"
   },
   "keywords": ["helensvale", "connect", "booking", "marketplace"],
   "author": "PowerHouse Ventures",
