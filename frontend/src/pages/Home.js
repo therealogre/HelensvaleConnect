@@ -43,13 +43,12 @@ import {
   CurrencyExchange,
 } from '@mui/icons-material';
 import PreOrderModal from '../components/PreOrderModal';
-import SEO, { SEOConfigs } from '../components/SEO';
 import axios from 'axios';
 
 const Home = () => {
   const theme = useTheme();
   const [exchangeRates, setExchangeRates] = useState(null);
-  const [preOrderCount, setPreOrderCount] = useState(2847); // Starting count for social proof
+  const [preOrderCount, setPreOrderCount] = useState(2847);
   const [isPreOrderOpen, setIsPreOrderOpen] = useState(false);
 
   // Problem-Solution data inspired by Amazon's customer obsession
@@ -79,12 +78,12 @@ const Home = () => {
       stats: "Average 2-minute booking time"
     },
     {
-      icon: <Security />,
-      title: "Trust & Safety Concerns",
-      problem: "No protection against fraud or poor service quality",
-      solution: "Escrow payments, insurance coverage, and money-back guarantee",
-      description: "Your payment is held securely until service completion. Full insurance coverage and 100% money-back guarantee.",
-      stats: "ZiG 2.5M+ in protected transactions"
+      icon: <Verified />,
+      title: "Trust Issues",
+      problem: "No guarantee of service quality or reliability",
+      solution: "Money-back guarantee with comprehensive insurance coverage",
+      description: "All services backed by our satisfaction guarantee. If you're not happy, we'll refund 100% and find you a better provider.",
+      stats: "99.2% positive feedback"
     }
   ];
 
@@ -93,19 +92,13 @@ const Home = () => {
     {
       icon: <CurrencyExchange />,
       title: "Zimbabwe-First Design",
-      description: "Built specifically for Zimbabwe's unique economic environment with ZiG currency support and local payment methods.",
-      benefit: "Save 40% on transaction fees"
-    },
-    {
-      icon: <Verified />,
-      title: "Trust & Verification",
-      description: "Every service provider is thoroughly vetted with ID verification, skill tests, and background checks.",
-      benefit: "99.2% verified providers"
+      description: "Built specifically for Zimbabwe's unique market with ZiG currency integration and local payment methods",
+      benefit: "Native ZiG support"
     },
     {
       icon: <Speed />,
-      title: "Instant Everything",
-      description: "Book services instantly, get real-time updates, and receive immediate support when you need it.",
+      title: "Lightning Fast",
+      description: "Find and book services in under 2 minutes. No more calling around or waiting for callbacks.",
       benefit: "2-minute average booking"
     }
   ];
@@ -127,78 +120,85 @@ const Home = () => {
       description: 'Car repairs, maintenance, and detailing',
       icon: <DirectionsCar />,
       vendors: 156,
-      avgPrice: 'ZiG 120',
+      avgPrice: 'ZiG 75',
       popular: false
     },
     {
-      id: 'beauty-wellness',
-      name: 'Beauty & Wellness',
-      description: 'Salons, spas, fitness, and health services',
-      icon: <Face />,
+      id: 'food-catering',
+      name: 'Food & Catering',
+      description: 'Restaurants, catering, and food delivery',
+      icon: <Restaurant />,
       vendors: 189,
       avgPrice: 'ZiG 35',
       popular: true
     },
     {
-      id: 'professional',
-      name: 'Professional Services',
-      description: 'Legal, accounting, consulting, and business',
-      icon: <Gavel />,
-      vendors: 98,
-      avgPrice: 'ZiG 200',
-      popular: false
-    },
-    {
-      id: 'construction',
-      name: 'Construction',
-      description: 'Building, renovation, and repair services',
-      icon: <Build />,
-      vendors: 167,
-      avgPrice: 'ZiG 300',
-      popular: true
-    },
-    {
-      id: 'technology',
-      name: 'Technology',
-      description: 'IT support, web design, and digital services',
+      id: 'tech-services',
+      name: 'Tech Services',
+      description: 'Computer repair, web design, and IT support',
       icon: <Computer />,
-      vendors: 78,
-      avgPrice: 'ZiG 150',
+      vendors: 98,
+      avgPrice: 'ZiG 60',
       popular: false
     },
     {
       id: 'education',
-      name: 'Education',
-      description: 'Tutoring, training, and skill development',
+      name: 'Education & Tutoring',
+      description: 'Private tutoring, training, and skill development',
       icon: <School />,
       vendors: 145,
-      avgPrice: 'ZiG 80',
+      avgPrice: 'ZiG 40',
+      popular: true
+    },
+    {
+      id: 'health-wellness',
+      name: 'Health & Wellness',
+      description: 'Healthcare, fitness, beauty, and wellness services',
+      icon: <LocalHospital />,
+      vendors: 167,
+      avgPrice: 'ZiG 55',
       popular: false
     },
     {
-      id: 'health',
-      name: 'Health & Medical',
-      description: 'Healthcare, therapy, and medical services',
-      icon: <LocalHospital />,
-      vendors: 67,
-      avgPrice: 'ZiG 100',
+      id: 'legal-professional',
+      name: 'Legal & Professional',
+      description: 'Legal advice, accounting, and business services',
+      icon: <Gavel />,
+      vendors: 78,
+      avgPrice: 'ZiG 120',
       popular: false
+    },
+    {
+      id: 'personal-services',
+      name: 'Personal Services',
+      description: 'Beauty, grooming, and personal care services',
+      icon: <Face />,
+      vendors: 201,
+      avgPrice: 'ZiG 45',
+      popular: true
     }
   ];
 
   useEffect(() => {
-    // Fetch exchange rates
+    // Fetch real-time exchange rates
     const fetchRates = async () => {
       try {
-        const response = await axios.get('/api/payments/exchange-rates');
-        setExchangeRates(response.data.data.rates);
+        const response = await axios.get('http://localhost:5000/api/currency/rates');
+        setExchangeRates(response.data);
       } catch (error) {
-        console.error('Failed to fetch exchange rates');
+        console.error('Failed to fetch exchange rates:', error);
+        // Fallback rates
+        setExchangeRates({
+          ZIG: 1,
+          USD: 0.000076,
+          ZWL: 1300,
+          lastUpdated: new Date().toISOString()
+        });
       }
     };
     fetchRates();
 
-    // Simulate real-time pre-order count updates (Musk-style urgency)
+    // Simulate real-time pre-order count updates
     const interval = setInterval(() => {
       setPreOrderCount(prev => prev + Math.floor(Math.random() * 3));
     }, 30000);
@@ -206,65 +206,7 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Amazon-inspired problem-solution features
-  const problemSolutions = [
-    {
-      problem: "Can't find reliable local services in Zimbabwe",
-      solution: "Verified vendor network with real reviews",
-      icon: <Security />,
-      title: 'Verified Local Services',
-      description: 'Every vendor is verified with proper documentation. No more guessing - find trusted professionals in your area.',
-      stats: '500+ Verified Vendors'
-    },
-    {
-      problem: "Payment challenges with ZiG and foreign currency",
-      solution: "Multi-currency support with real-time rates",
-      icon: <CurrencyExchange />,
-      title: 'Smart Payment Solutions',
-      description: 'Pay in ZiG, USD, or EcoCash. Real-time exchange rates ensure fair pricing for everyone.',
-      stats: 'Live Exchange Rates'
-    },
-    {
-      problem: "Difficult to book services without calling",
-      solution: "One-click booking with instant confirmation",
-      icon: <Speed />,
-      title: 'Instant Booking',
-      description: 'Book any service in under 30 seconds. No phone calls, no waiting - just instant confirmation.',
-      stats: '< 30 Second Booking'
-    },
-    {
-      problem: "No way to track service quality",
-      solution: "Comprehensive review and rating system",
-      icon: <Star />,
-      title: 'Quality Assurance',
-      description: 'Real reviews from real customers. Rate services and help others make informed decisions.',
-      stats: '4.9/5 Avg Rating'
-    }
-  ];
-
-  // Bezos-inspired value propositions
-  const valueProps = [
-    {
-      icon: <LocalAtm />,
-      title: 'Save Money',
-      description: 'Compare prices across vendors. Get the best deals with our price matching guarantee.',
-      benefit: 'Up to 30% savings'
-    },
-    {
-      icon: <Speed />,
-      title: 'Save Time',
-      description: 'Find, compare, and book services in minutes instead of hours of calling around.',
-      benefit: '10x faster booking'
-    },
-    {
-      icon: <Security />,
-      title: 'Peace of Mind',
-      description: 'All vendors are verified, insured, and rated by real customers. Your satisfaction guaranteed.',
-      benefit: '100% satisfaction guarantee'
-    }
-  ];
-
-  // Zuckerberg-inspired social proof
+  // Social proof data
   const socialProof = [
     { metric: preOrderCount.toLocaleString(), label: 'Early Access Members', trend: '+12% today' },
     { metric: '847', label: 'Verified Vendors Ready', trend: '+23 this week' },
@@ -272,525 +214,374 @@ const Home = () => {
     { metric: '4.9/5', label: 'Pre-Launch Rating', trend: 'From beta users' }
   ];
 
-  // Musk-inspired urgency features
-  const urgencyFeatures = [
-    {
-      title: 'Early Bird Pricing',
-      description: 'Lock in 50% off for life. Price increases after 1000 more sign-ups.',
-      remaining: 1000 - (preOrderCount % 1000),
-      color: 'error'
-    },
-    {
-      title: 'Founder Access',
-      description: 'Direct line to founders + exclusive features for first 5000 members.',
-      remaining: 5000 - preOrderCount,
-      color: 'warning'
-    }
-  ];
-
-  const featuredCategories = [
-    {
-      id: 1,
-      name: 'Home Services',
-      description: 'Plumbing, electrical, cleaning, repairs',
-      vendors: 127,
-      avgPrice: 'ZiG 45',
-      icon: <Business />,
-      popular: true
-    },
-    {
-      id: 2,
-      name: 'Beauty & Wellness',
-      description: 'Salons, spas, fitness, healthcare',
-      vendors: 89,
-      avgPrice: 'ZiG 35',
-      icon: <Star />,
-      popular: false
-    },
-    {
-      id: 3,
-      name: 'Professional Services',
-      description: 'Legal, accounting, consulting, IT',
-      vendors: 156,
-      avgPrice: 'ZiG 85',
-      icon: <AccountBalance />,
-      popular: true
-    }
-  ];
-
   return (
-    <Box>
-      <SEO {...SEOConfigs.home} />
-      
-      {/* Hero Section */}
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-          color: 'white',
-          py: { xs: 8, md: 12 },
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Urgency Banner */}
-        <Box sx={{ bgcolor: 'error.main', py: 1, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            🔥 EARLY ACCESS: {urgencyFeatures[0].remaining} spots left at 50% off • Price increases in 24 hours
-          </Typography>
-        </Box>
-
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Chip 
-                label="🇿🇼 Made for Zimbabwe" 
-                sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', mb: 2 }}
-              />
-              <Typography
-                variant="h1"
-                component="h1"
-                gutterBottom
-                sx={{
-                  fontWeight: 800,
-                  fontSize: { xs: '2.5rem', md: '4rem' },
-                  lineHeight: 1.1,
-                  background: 'linear-gradient(45deg, #fff 30%, #e3f2fd 90%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Zimbabwe's First Smart Service Marketplace
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{
-                  mb: 3,
-                  opacity: 0.9,
-                  fontWeight: 400,
-                  fontSize: { xs: '1.2rem', md: '1.5rem' },
-                }}
-              >
-                Find, book & pay for local services in ZiG, USD or EcoCash. 
-                <strong> No more calling around.</strong>
-              </Typography>
-
-              {/* Social Proof */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-                <Avatar sx={{ bgcolor: 'success.main' }}>
-                  <CheckCircle />
-                </Avatar>
-                <Typography variant="body1">
-                  <strong>{preOrderCount.toLocaleString()}</strong> Zimbabweans already joined • 
-                  <strong> 847</strong> verified vendors ready
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => setIsPreOrderOpen(true)}
+    <>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        {/* Hero Section */}
+        <Box
+          sx={{
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+            color: 'white',
+            py: { xs: 8, md: 12 },
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <Container maxWidth="lg">
+            <Grid container spacing={4} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Typography
+                  variant="h2"
+                  component="h1"
+                  gutterBottom
                   sx={{
-                    px: 4,
-                    py: 1.5,
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    borderRadius: 2,
-                    background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                    },
+                    fontWeight: 'bold',
+                    fontSize: { xs: '2.5rem', md: '3.5rem' },
+                    lineHeight: 1.2
                   }}
                 >
-                  🚀 Join Early Access - Save 60%
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
+                  Zimbabwe's Premier Service Marketplace
+                </Typography>
+                <Typography
+                  variant="h5"
                   sx={{
-                    borderColor: 'white',
-                    color: 'white',
-                    px: 4,
-                    py: 2,
-                    '&:hover': {
-                      borderColor: 'white',
+                    mb: 4,
+                    opacity: 0.9,
+                    fontSize: { xs: '1.2rem', md: '1.5rem' }
+                  }}
+                >
+                  Connect with verified local service providers. Pay in ZiG, USD, or EcoCash. 
+                  Book instantly, get guaranteed results.
+                </Typography>
+
+                {/* Live Exchange Rate Display */}
+                {exchangeRates && (
+                  <Paper
+                    sx={{
+                      p: 2,
+                      mb: 4,
                       bgcolor: 'rgba(255,255,255,0.1)',
-                    },
-                  }}
-                >
-                  Watch Demo (2 min)
-                </Button>
-              </Box>
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ mb: 1, opacity: 0.8 }}>
+                      🔄 Live Exchange Rates (Updated every 30s)
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                      <Typography variant="body1">
+                        <strong>1 ZiG = ${(exchangeRates.USD || 0).toFixed(6)} USD</strong>
+                      </Typography>
+                      <Typography variant="body1">
+                        <strong>1 ZiG = ZWL {(exchangeRates.ZWL || 0).toFixed(2)}</strong>
+                      </Typography>
+                    </Box>
+                  </Paper>
+                )}
 
-              {/* Trust indicators */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 3, opacity: 0.8 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Security fontSize="small" />
-                  <Typography variant="body2">Bank-level security</Typography>
+                {/* CTA Buttons */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => setIsPreOrderOpen(true)}
+                    sx={{
+                      bgcolor: 'warning.main',
+                      color: 'warning.contrastText',
+                      px: 4,
+                      py: 1.5,
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        bgcolor: 'warning.dark',
+                        transform: 'translateY(-2px)',
+                        boxShadow: 6
+                      }
+                    }}
+                  >
+                    🚀 Join Early Access
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/vendors"
+                    variant="outlined"
+                    size="large"
+                    sx={{
+                      borderColor: 'white',
+                      color: 'white',
+                      px: 4,
+                      py: 1.5,
+                      fontSize: '1.1rem',
+                      '&:hover': {
+                        borderColor: 'white',
+                        bgcolor: 'rgba(255,255,255,0.1)'
+                      }
+                    }}
+                  >
+                    Browse Services
+                  </Button>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Smartphone fontSize="small" />
-                  <Typography variant="body2">EcoCash integrated</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Support fontSize="small" />
-                  <Typography variant="body2">24/7 support</Typography>
-                </Box>
-              </Box>
-            </Grid>
+              </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Paper
-                elevation={20}
-                sx={{
-                  p: 4,
-                  borderRadius: 4,
-                  bgcolor: 'rgba(255,255,255,0.95)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: 'text.primary'
-                }}
-              >
-                <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 700 }}>
-                  🔥 Live Platform Stats
-                </Typography>
-                <Grid container spacing={3}>
-                  {socialProof.map((stat, index) => (
+              <Grid item xs={12} md={6}>
+                {/* Social Proof Metrics */}
+                <Grid container spacing={2}>
+                  {socialProof.map((item, index) => (
                     <Grid item xs={6} key={index}>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                          {stat.metric}
+                      <Paper
+                        sx={{
+                          p: 2,
+                          textAlign: 'center',
+                          bgcolor: 'rgba(255,255,255,0.1)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255,255,255,0.2)'
+                        }}
+                      >
+                        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                          {item.metric}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {stat.label}
+                        <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.5 }}>
+                          {item.label}
                         </Typography>
-                        <Chip 
-                          label={stat.trend} 
-                          size="small" 
-                          color="success" 
-                          sx={{ mt: 0.5, fontSize: '0.7rem' }}
-                        />
-                      </Box>
+                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                          {item.trend}
+                        </Typography>
+                      </Paper>
                     </Grid>
                   ))}
                 </Grid>
-
-                {/* Live exchange rate display */}
-                {exchangeRates && (
-                  <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                      💱 Live Exchange Rates
-                    </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2">1 USD = ZiG {(1/exchangeRates.USD).toFixed(2)}</Typography>
-                      <Typography variant="body2" color="success.main">Live</Typography>
-                    </Box>
-                  </Box>
-                )}
-              </Paper>
+              </Grid>
             </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Problem-Solution Section - Amazon-inspired */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
-          <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
-            We Solve Zimbabwe's Biggest Service Problems
-          </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            Every feature we built addresses a real problem Zimbabweans face daily
-          </Typography>
+          </Container>
         </Box>
 
-        <Grid container spacing={4}>
-          {problemSolutions.map((item, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Card
-                sx={{
-                  height: '100%',
-                  p: 3,
-                  transition: 'all 0.3s ease',
-                  border: '2px solid transparent',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    border: '2px solid',
-                    borderColor: 'primary.main',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-                  },
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: 'error.light',
-                      width: 56,
-                      height: 56,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {item.icon}
-                  </Avatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body2" color="error.main" sx={{ mb: 2, fontWeight: 600 }}>
-                      ❌ Problem: {item.problem}
-                    </Typography>
-                    <Typography variant="body2" color="success.main" sx={{ mb: 2, fontWeight: 600 }}>
-                      ✅ Our Solution: {item.solution}
-                    </Typography>
-                    <Typography variant="body1" sx={{ mb: 2 }}>
-                      {item.description}
-                    </Typography>
-                    <Chip 
-                      label={item.stats} 
-                      color="primary" 
-                      variant="outlined" 
-                      size="small"
-                    />
-                  </Box>
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      {/* Value Proposition Section - Bezos-inspired */}
-      <Box sx={{ bgcolor: 'grey.50', py: 8 }}>
-        <Container maxWidth="lg">
-          <Typography
-            variant="h3"
-            component="h2"
-            textAlign="center"
-            gutterBottom
-            sx={{ fontWeight: 700, mb: 2 }}
-          >
-            The Zimbabwe Advantage
-          </Typography>
-          <Typography
-            variant="h6"
-            textAlign="center"
-            color="text.secondary"
-            sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}
-          >
-            Built specifically for Zimbabwe's unique challenges and opportunities
-          </Typography>
+        {/* Problem-Solution Section */}
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Solving Zimbabwe's Service Challenges
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              We understand the unique challenges of finding reliable services in Zimbabwe
+            </Typography>
+          </Box>
 
           <Grid container spacing={4}>
-            {valueProps.map((prop, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <Paper
-                  elevation={0}
+            {problemSolutions.map((item, index) => (
+              <Grid item xs={12} md={6} key={index}>
+                <Card
                   sx={{
-                    p: 4,
                     height: '100%',
-                    textAlign: 'center',
-                    border: '2px solid',
-                    borderColor: 'primary.light',
-                    borderRadius: 3,
-                    transition: 'all 0.3s ease',
+                    transition: 'transform 0.3s ease-in-out',
                     '&:hover': {
-                      borderColor: 'primary.main',
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                    },
+                      transform: 'translateY(-8px)',
+                      boxShadow: 6
+                    }
                   }}
                 >
-                  <Avatar
-                    sx={{
-                      bgcolor: 'primary.main',
-                      width: 80,
-                      height: 80,
-                      mx: 'auto',
-                      mb: 3,
-                    }}
-                  >
-                    {prop.icon}
-                  </Avatar>
-                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
-                    {prop.title}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    {prop.description}
-                  </Typography>
-                  <Chip
-                    label={prop.benefit}
-                    color="success"
-                    sx={{ fontWeight: 700, fontSize: '0.9rem' }}
-                  />
-                </Paper>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: 'error.main',
+                          mr: 2,
+                          width: 48,
+                          height: 48
+                        }}
+                      >
+                        {item.icon}
+                      </Avatar>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                        {item.title}
+                      </Typography>
+                    </Box>
+                    
+                    <Typography variant="body2" color="error.main" sx={{ mb: 2, fontWeight: 'medium' }}>
+                      ❌ Problem: {item.problem}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="success.main" sx={{ mb: 2, fontWeight: 'medium' }}>
+                      ✅ Our Solution: {item.solution}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {item.description}
+                    </Typography>
+                    
+                    <Chip
+                      label={item.stats}
+                      color="primary"
+                      size="small"
+                      sx={{ fontWeight: 'bold' }}
+                    />
+                  </CardContent>
+                </Card>
               </Grid>
             ))}
           </Grid>
         </Container>
-      </Box>
 
-      {/* Featured Categories Section - Amazon-inspired marketplace */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography
-          variant="h3"
-          component="h2"
-          textAlign="center"
-          gutterBottom
-          sx={{ fontWeight: 700, mb: 2 }}
-        >
-          Popular Service Categories
-        </Typography>
-        <Typography
-          variant="h6"
-          textAlign="center"
-          color="text.secondary"
-          sx={{ mb: 6, maxWidth: 600, mx: 'auto' }}
-        >
-          From home repairs to professional services - we've got Zimbabwe covered
-        </Typography>
+        {/* Featured Categories */}
+        <Box sx={{ bgcolor: 'grey.50', py: 8 }}>
+          <Container maxWidth="lg">
+            <Box sx={{ textAlign: 'center', mb: 6 }}>
+              <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Popular Service Categories
+              </Typography>
+              <Typography variant="h6" color="text.secondary">
+                Find the right service provider for your needs
+              </Typography>
+            </Box>
 
-        <Grid container spacing={3}>
-          {featuredCategories.map((category) => (
-            <Grid item xs={12} sm={6} md={3} key={category.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  border: '2px solid transparent',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    border: '2px solid',
-                    borderColor: 'primary.main',
-                    boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
-                  },
-                }}
-              >
-                {category.popular && (
-                  <Chip
-                    label="🔥 Popular"
-                    color="error"
-                    size="small"
+            <Grid container spacing={3}>
+              {featuredCategories.map((category) => (
+                <Grid item xs={12} sm={6} md={3} key={category.id}>
+                  <Card
                     sx={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      zIndex: 1,
-                      fontWeight: 700
+                      height: '100%',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease-in-out',
+                      position: 'relative',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 4
+                      }
                     }}
-                  />
-                )}
-                <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                  >
+                    {category.popular && (
+                      <Chip
+                        label="Popular"
+                        color="secondary"
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          zIndex: 1
+                        }}
+                      />
+                    )}
+                    <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: 'primary.main',
+                          width: 56,
+                          height: 56,
+                          mx: 'auto',
+                          mb: 2
+                        }}
+                      >
+                        {category.icon}
+                      </Avatar>
+                      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        {category.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {category.description}
+                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">
+                          {category.vendors} vendors
+                        </Typography>
+                        <Typography variant="caption" color="primary.main" sx={{ fontWeight: 'bold' }}>
+                          from {category.avgPrice}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* Value Propositions */}
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Why Choose Helensvale Connect?
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4}>
+            {valueProps.map((prop, index) => (
+              <Grid item xs={12} md={6} key={index}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', p: 3 }}>
                   <Avatar
                     sx={{
-                      bgcolor: 'primary.main',
-                      width: 64,
-                      height: 64,
-                      mx: 'auto',
-                      mb: 2,
+                      bgcolor: 'secondary.main',
+                      mr: 3,
+                      width: 56,
+                      height: 56
                     }}
                   >
-                    {category.icon}
+                    {prop.icon}
                   </Avatar>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
-                    {category.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {category.description}
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {category.vendors} vendors
+                  <Box>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+                      {prop.title}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                      {prop.description}
                     </Typography>
                     <Chip
-                      label={`From ${category.avgPrice}`}
-                      size="small"
+                      label={prop.benefit}
                       color="success"
                       variant="outlined"
+                      size="small"
                     />
                   </Box>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    component={Link}
-                    to={`/categories/${category.id}`}
-                    size="small"
-                    variant="contained"
-                    fullWidth
-                    sx={{ m: 1 }}
-                  >
-                    Explore Category
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
 
-      {/* CTA Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Paper
+        {/* Final CTA Section */}
+        <Box
           sx={{
-            p: 6,
-            textAlign: 'center',
-            background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.secondary.light} 100%)`,
+            bgcolor: 'primary.main',
             color: 'white',
+            py: 8,
+            textAlign: 'center'
           }}
         >
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-            Ready to Get Started?
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            Join thousands of locals connecting with amazing businesses
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Container maxWidth="md">
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
+              Ready to Transform Your Service Experience?
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
+              Join {preOrderCount.toLocaleString()}+ Zimbabweans who've already secured their early access
+            </Typography>
             <Button
-              component={Link}
-              to="/register"
               variant="contained"
               size="large"
+              onClick={() => setIsPreOrderOpen(true)}
               sx={{
-                bgcolor: 'white',
-                color: 'primary.main',
-                px: 4,
+                bgcolor: 'warning.main',
+                color: 'warning.contrastText',
+                px: 6,
+                py: 2,
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
                 '&:hover': {
-                  bgcolor: 'grey.100',
-                },
+                  bgcolor: 'warning.dark',
+                  transform: 'scale(1.05)'
+                }
               }}
             >
-              Sign Up Now
+              🚀 Get Early Access Now
             </Button>
-            <Button
-              component={Link}
-              to="/vendors"
-              variant="outlined"
-              size="large"
-              sx={{
-                borderColor: 'white',
-                color: 'white',
-                px: 4,
-                '&:hover': {
-                  borderColor: 'white',
-                  bgcolor: 'rgba(255,255,255,0.1)',
-                },
-              }}
-            >
-              Browse Services
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
+          </Container>
+        </Box>
+      </Box>
 
       {/* Pre-Order Modal */}
-      <PreOrderModal 
-        open={isPreOrderOpen} 
-        onClose={() => setIsPreOrderOpen(false)} 
+      <PreOrderModal
+        open={isPreOrderOpen}
+        onClose={() => setIsPreOrderOpen(false)}
       />
-    </Box>
+    </>
   );
 };
 
