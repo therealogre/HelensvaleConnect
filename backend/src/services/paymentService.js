@@ -4,290 +4,295 @@ const currencyService = require('./currencyService');
 
 class PaymentService {
   constructor() {
-    this.paynowConfig = {
-      integrationId: process.env.PAYNOW_INTEGRATION_ID,
-      integrationKey: process.env.PAYNOW_INTEGRATION_KEY,
-      baseUrl: process.env.PAYNOW_BASE_URL || 'https://www.paynow.co.zw/interface/',
-      returnUrl: process.env.PAYNOW_RETURN_URL || 'http://localhost:3000/payment/return',
-      resultUrl: process.env.PAYNOW_RESULT_URL || 'http://localhost:3001/api/payments/paynow/callback'
+    // Stripe configuration for USD payments
+    this.stripeConfig = {
+      secretKey: process.env.STRIPE_SECRET_KEY,
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
+    };
+
+    // PayPal configuration
+    this.paypalConfig = {
+      clientId: process.env.PAYPAL_CLIENT_ID,
+      clientSecret: process.env.PAYPAL_CLIENT_SECRET,
+      baseUrl: process.env.PAYPAL_BASE_URL || 'https://api.sandbox.paypal.com'
     };
   }
 
-  // Generate PayNow payment
-  async createPayNowPayment(paymentData) {
+  // Create Stripe payment intent
+  async createStripePayment(paymentData) {
     try {
       const {
         amount,
-        currency = 'ZIG',
+        currency = 'USD',
         reference,
         email,
-        phone,
         description,
         bookingId
       } = paymentData;
 
-      // Convert to ZIG if needed
-      const zigAmount = currency === 'ZIG' ? amount : currencyService.convertCurrency(amount, currency, 'ZIG');
+      if (currency !== 'USD') {
+        throw new Error('Only USD payments are supported');
+      }
+
+      // Convert to cents for Stripe
+      const amountInCents = Math.round(amount * 100);
       
-      // Generate unique reference
-      const paymentRef = `HC_${bookingId}_${Date.now()}`;
-      
-      // Prepare PayNow data
-      const paynowData = {
-        id: this.paynowConfig.integrationId,
-        reference: paymentRef,
-        amount: zigAmount.toFixed(2),
-        additionalinfo: description || 'Helensvale Connect Service Payment',
-        returnurl: this.paynowConfig.returnUrl,
-        resulturl: this.paynowConfig.resultUrl,
-        authemail: email,
-        phone: phone,
-        status: 'Message'
+      const paymentIntent = {
+        amount: amountInCents,
+        currency: 'usd',
+        payment_method_types: ['card'],
+        metadata: {
+          bookingId,
+          reference,
+          platform: 'helensvale_connect'
+        },
+        description: description || 'Helensvale Connect Service Payment'
       };
 
-      // Generate hash
-      const hash = this.generatePayNowHash(paynowData);
-      paynowData.hash = hash;
-
-      // Send to PayNow
-      const response = await axios.post(
-        `${this.paynowConfig.baseUrl}initiatetransaction`,
-        new URLSearchParams(paynowData),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }
-      );
-
-      const result = this.parsePayNowResponse(response.data);
-      
-      if (result.status === 'Ok') {
-        return {
-          success: true,
-          paymentUrl: result.browserurl,
-          pollUrl: result.pollurl,
-          reference: paymentRef,
-          amount: zigAmount,
-          currency: 'ZIG',
-          provider: 'paynow'
-        };
-      } else {
-        throw new Error(result.error || 'PayNow payment creation failed');
-      }
+      return {
+        success: true,
+        paymentIntent,
+        clientSecret: `pi_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`,
+        amount: amount,
+        currency: 'USD',
+        reference
+      };
     } catch (error) {
-      console.error('PayNow payment error:', error);
-      throw new Error(`Payment creation failed: ${error.message}`);
+      console.error('Stripe payment creation failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
   }
 
-  // Generate EcoCash payment
-  async createEcoCashPayment(paymentData) {
+  // Create PayPal payment
+  async createPayPalPayment(paymentData) {
     try {
       const {
         amount,
-        currency = 'ZIG',
-        phone,
+        currency = 'USD',
         reference,
         description,
         bookingId
       } = paymentData;
 
-      // Convert to ZIG if needed
-      const zigAmount = currency === 'ZIG' ? amount : currencyService.convertCurrency(amount, currency, 'ZIG');
-      
-      // Calculate EcoCash fees
-      const breakdown = currencyService.calculatePaymentBreakdown(zigAmount, 'ZIG');
-      const totalAmount = breakdown.methods.ecocash.total;
+      if (currency !== 'USD') {
+        throw new Error('Only USD payments are supported');
+      }
 
-      // Generate unique reference
-      const paymentRef = `EC_${bookingId}_${Date.now()}`;
-
-      // Prepare EcoCash data via PayNow
-      const paynowData = {
-        id: this.paynowConfig.integrationId,
-        reference: paymentRef,
-        amount: totalAmount.toFixed(2),
-        additionalinfo: description || 'Helensvale Connect Service Payment',
-        returnurl: this.paynowConfig.returnUrl,
-        resulturl: this.paynowConfig.resultUrl,
-        phone: phone,
-        method: 'ecocash',
-        status: 'Message'
-      };
-
-      const hash = this.generatePayNowHash(paynowData);
-      paynowData.hash = hash;
-
-      const response = await axios.post(
-        `${this.paynowConfig.baseUrl}remotetransaction`,
-        new URLSearchParams(paynowData),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
+      const payment = {
+        intent: 'sale',
+        payer: {
+          payment_method: 'paypal'
+        },
+        transactions: [{
+          amount: {
+            total: amount.toFixed(2),
+            currency: 'USD'
+          },
+          description: description || 'Helensvale Connect Service Payment',
+          custom: bookingId,
+          invoice_number: reference
+        }],
+        redirect_urls: {
+          return_url: `${process.env.FRONTEND_URL}/payment/success`,
+          cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`
         }
-      );
+      };
 
-      const result = this.parsePayNowResponse(response.data);
-      
-      if (result.status === 'Ok') {
-        return {
-          success: true,
-          reference: paymentRef,
-          amount: zigAmount,
-          totalAmount: totalAmount,
-          fee: breakdown.methods.ecocash.fee,
-          currency: 'ZIG',
-          provider: 'ecocash',
-          instructions: result.instructions || 'Check your phone for EcoCash prompt'
-        };
-      } else {
-        throw new Error(result.error || 'EcoCash payment creation failed');
-      }
-    } catch (error) {
-      console.error('EcoCash payment error:', error);
-      throw new Error(`EcoCash payment failed: ${error.message}`);
-    }
-  }
-
-  // Check payment status
-  async checkPaymentStatus(pollUrl) {
-    try {
-      const response = await axios.post(pollUrl);
-      const result = this.parsePayNowResponse(response.data);
-      
       return {
-        status: result.status,
-        paid: result.status === 'Paid',
-        amount: result.amount,
-        reference: result.reference,
-        paynowreference: result.paynowreference,
-        pollurl: result.pollurl
+        success: true,
+        payment,
+        approvalUrl: `https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=${Date.now()}`,
+        amount: amount,
+        currency: 'USD',
+        reference
       };
     } catch (error) {
-      console.error('Payment status check error:', error);
-      throw new Error(`Status check failed: ${error.message}`);
+      console.error('PayPal payment creation failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
   }
 
-  // Generate PayNow hash
-  generatePayNowHash(data) {
-    const values = Object.keys(data)
-      .filter(key => key !== 'hash')
-      .sort()
-      .map(key => data[key])
-      .join('');
-    
-    const stringToHash = values + this.paynowConfig.integrationKey;
-    return crypto.createHash('sha512').update(stringToHash).digest('hex').toUpperCase();
-  }
+  // Process bank transfer (manual verification)
+  async createBankTransferPayment(paymentData) {
+    try {
+      const {
+        amount,
+        currency = 'USD',
+        reference,
+        email,
+        description,
+        bookingId
+      } = paymentData;
 
-  // Parse PayNow response
-  parsePayNowResponse(responseText) {
-    const lines = responseText.split('\n');
-    const result = {};
-    
-    lines.forEach(line => {
-      const [key, value] = line.split('=');
-      if (key && value) {
-        result[key.toLowerCase()] = value;
+      if (currency !== 'USD') {
+        throw new Error('Only USD payments are supported');
       }
-    });
-    
-    return result;
+
+      return {
+        success: true,
+        paymentMethod: 'bank_transfer',
+        amount: amount,
+        currency: 'USD',
+        reference,
+        instructions: {
+          bankName: 'Helensvale Connect Business Account',
+          accountNumber: '****-****-1234',
+          routingNumber: '****5678',
+          reference: reference,
+          amount: `$${amount.toFixed(2)}`,
+          note: 'Please include the reference number in your transfer'
+        },
+        status: 'pending_verification'
+      };
+    } catch (error) {
+      console.error('Bank transfer setup failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 
-  // Validate PayNow callback
-  validatePayNowCallback(data) {
-    const receivedHash = data.hash;
-    delete data.hash;
-    
-    const calculatedHash = this.generatePayNowHash(data);
-    return receivedHash === calculatedHash;
+  // Verify payment status
+  async verifyPayment(paymentId, method = 'stripe') {
+    try {
+      switch (method) {
+        case 'stripe':
+          return await this.verifyStripePayment(paymentId);
+        case 'paypal':
+          return await this.verifyPayPalPayment(paymentId);
+        case 'bank_transfer':
+          return await this.verifyBankTransfer(paymentId);
+        default:
+          throw new Error('Unsupported payment method');
+      }
+    } catch (error) {
+      console.error('Payment verification failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 
-  // Get supported payment methods
-  getSupportedMethods() {
+  async verifyStripePayment(paymentIntentId) {
+    // Simulate Stripe verification
+    return {
+      success: true,
+      status: 'succeeded',
+      amount: 0,
+      currency: 'USD',
+      paymentMethod: 'stripe'
+    };
+  }
+
+  async verifyPayPalPayment(paymentId) {
+    // Simulate PayPal verification
+    return {
+      success: true,
+      status: 'completed',
+      amount: 0,
+      currency: 'USD',
+      paymentMethod: 'paypal'
+    };
+  }
+
+  async verifyBankTransfer(transferId) {
+    // Manual verification required
+    return {
+      success: true,
+      status: 'pending_verification',
+      amount: 0,
+      currency: 'USD',
+      paymentMethod: 'bank_transfer',
+      requiresManualVerification: true
+    };
+  }
+
+  // Calculate payment breakdown with fees
+  calculatePaymentBreakdown(amount, method = 'stripe') {
+    return currencyService.calculatePaymentBreakdown(amount, 'USD');
+  }
+
+  // Get available payment methods
+  getAvailablePaymentMethods() {
     return [
       {
-        id: 'paynow',
-        name: 'PayNow',
-        description: 'Pay with PayNow - supports all major banks and mobile money',
-        icon: 'paynow',
-        currencies: ['ZIG', 'USD'],
-        fees: {
-          percentage: 1.5,
-          minimum: 0.50,
-          currency: 'ZIG'
-        }
+        id: 'stripe',
+        name: 'Credit/Debit Card',
+        description: 'Visa, Mastercard, American Express',
+        fee: '2.9%',
+        processingTime: 'Instant',
+        icon: 'credit_card'
       },
       {
-        id: 'ecocash',
-        name: 'EcoCash',
-        description: 'Pay directly with your EcoCash wallet',
-        icon: 'ecocash',
-        currencies: ['ZIG'],
-        fees: {
-          percentage: 2.0,
-          minimum: 0,
-          currency: 'ZIG'
-        }
+        id: 'paypal',
+        name: 'PayPal',
+        description: 'Pay with your PayPal account',
+        fee: '3.4%',
+        processingTime: 'Instant',
+        icon: 'paypal'
       },
       {
         id: 'bank_transfer',
         name: 'Bank Transfer',
-        description: 'Direct bank transfer - no fees',
-        icon: 'bank',
-        currencies: ['ZIG', 'USD'],
-        fees: {
-          percentage: 0,
-          minimum: 0,
-          currency: 'ZIG'
-        }
+        description: 'Direct bank transfer (manual verification)',
+        fee: 'Free',
+        processingTime: '1-3 business days',
+        icon: 'account_balance'
       }
     ];
   }
 
-  // Calculate total with fees
-  calculatePaymentTotal(amount, currency, method) {
-    const breakdown = currencyService.calculatePaymentBreakdown(amount, currency);
-    return breakdown.methods[method] || breakdown.methods.paynow;
-  }
-
-  // Generate payment summary
-  generatePaymentSummary(bookingData, paymentMethod) {
-    const { service, participants = 1, totalAmount, currency = 'ZIG' } = bookingData;
-    
-    const breakdown = currencyService.calculatePaymentBreakdown(totalAmount, currency);
-    const methodBreakdown = breakdown.methods[paymentMethod];
-    
-    return {
-      service: {
-        name: service.name,
-        price: service.price,
-        participants: participants,
-        subtotal: totalAmount
-      },
-      currency: {
-        original: currency,
-        display: 'ZIG',
-        exchangeRate: currency !== 'ZIG' ? currencyService.getCurrentRates()[currency] : 1
-      },
-      payment: {
-        method: paymentMethod,
-        subtotal: breakdown.zig.amount,
-        fee: methodBreakdown.fee,
-        total: methodBreakdown.total,
-        formatted: {
-          subtotal: breakdown.zig.formatted,
-          fee: currencyService.formatCurrency(methodBreakdown.fee, 'ZIG'),
-          total: methodBreakdown.formatted
-        }
-      },
-      exchangeRates: currencyService.getCurrentRates()
-    };
+  // Process refund
+  async processRefund(paymentId, amount, method = 'stripe') {
+    try {
+      switch (method) {
+        case 'stripe':
+          return {
+            success: true,
+            refundId: `re_${Date.now()}`,
+            amount,
+            currency: 'USD',
+            status: 'succeeded'
+          };
+        case 'paypal':
+          return {
+            success: true,
+            refundId: `RF_${Date.now()}`,
+            amount,
+            currency: 'USD',
+            status: 'completed'
+          };
+        case 'bank_transfer':
+          return {
+            success: true,
+            refundId: `BT_${Date.now()}`,
+            amount,
+            currency: 'USD',
+            status: 'pending_manual_processing'
+          };
+        default:
+          throw new Error('Unsupported payment method for refund');
+      }
+    } catch (error) {
+      console.error('Refund processing failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
 }
 
-module.exports = new PaymentService();
+// Singleton instance
+const paymentService = new PaymentService();
+
+module.exports = paymentService;

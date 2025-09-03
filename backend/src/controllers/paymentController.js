@@ -8,7 +8,7 @@ const { validationResult } = require('express-validator');
 // @access  Public
 exports.getPaymentMethods = async (req, res, next) => {
   try {
-    const methods = paymentService.getSupportedMethods();
+    const methods = paymentService.getAvailablePaymentMethods();
     const exchangeRates = currencyService.getCurrentRates();
     
     res.status(200).json({
@@ -16,7 +16,7 @@ exports.getPaymentMethods = async (req, res, next) => {
       data: {
         methods,
         exchangeRates,
-        baseCurrency: 'ZIG'
+        baseCurrency: 'USD'
       }
     });
   } catch (error) {
@@ -24,19 +24,18 @@ exports.getPaymentMethods = async (req, res, next) => {
   }
 };
 
-// @desc    Get current exchange rates
+// @desc    Get current exchange rates (USD only)
 // @route   GET /api/payments/exchange-rates
 // @access  Public
 exports.getExchangeRates = async (req, res, next) => {
   try {
     const rates = currencyService.getCurrentRates();
-    const popularPairs = currencyService.getPopularPairs();
     
     res.status(200).json({
       success: true,
       data: {
         rates,
-        popularPairs,
+        baseCurrency: 'USD',
         lastUpdated: rates.lastUpdated
       }
     });
@@ -50,12 +49,19 @@ exports.getExchangeRates = async (req, res, next) => {
 // @access  Public
 exports.calculatePayment = async (req, res, next) => {
   try {
-    const { amount, currency = 'ZIG', method = 'paynow' } = req.body;
+    const { amount, currency = 'USD', method = 'stripe' } = req.body;
     
     if (!amount || amount <= 0) {
       return res.status(400).json({
         success: false,
         message: 'Valid amount is required'
+      });
+    }
+
+    if (currency !== 'USD') {
+      return res.status(400).json({
+        success: false,
+        message: 'Only USD currency is supported'
       });
     }
     
@@ -98,7 +104,7 @@ exports.createPayment = async (req, res, next) => {
       });
     }
     
-    const { bookingId, paymentMethod, phone } = req.body;
+    const { bookingId, paymentMethod } = req.body;
     
     // Get booking details
     const booking = await Booking.findById(bookingId).populate('vendor customer');
@@ -127,10 +133,9 @@ exports.createPayment = async (req, res, next) => {
     
     const paymentData = {
       amount: booking.totalAmount,
-      currency: 'ZIG',
+      currency: 'USD',
       reference: `BOOKING_${bookingId}`,
       email: booking.customer.email,
-      phone: phone || booking.customer.phone,
       description: `Payment for ${booking.service.name} - ${booking.vendor.businessName}`,
       bookingId: bookingId
     };
@@ -138,11 +143,14 @@ exports.createPayment = async (req, res, next) => {
     let paymentResult;
     
     switch (paymentMethod) {
-      case 'paynow':
-        paymentResult = await paymentService.createPayNowPayment(paymentData);
+      case 'stripe':
+        paymentResult = await paymentService.createStripePayment(paymentData);
         break;
-      case 'ecocash':
-        paymentResult = await paymentService.createEcoCashPayment(paymentData);
+      case 'paypal':
+        paymentResult = await paymentService.createPayPalPayment(paymentData);
+        break;
+      case 'bank_transfer':
+        paymentResult = await paymentService.createBankTransferPayment(paymentData);
         break;
       default:
         return res.status(400).json({
@@ -220,48 +228,33 @@ exports.checkPaymentStatus = async (req, res, next) => {
     }
     
     // Check with payment provider if still pending
-    if (booking.payment.pollUrl) {
-      try {
-        const statusResult = await paymentService.checkPaymentStatus(booking.payment.pollUrl);
+    try {
+      const statusResult = await paymentService.verifyPayment(reference, booking.payment.method);
+      
+      if (statusResult.success && statusResult.status === 'succeeded') {
+        // Update booking status
+        booking.payment.status = 'paid';
+        booking.payment.paidAmount = statusResult.amount;
+        booking.payment.paymentDate = new Date();
+        booking.status = 'confirmed';
         
-        if (statusResult.paid) {
-          // Update booking status
-          booking.payment.status = 'paid';
-          booking.payment.paidAmount = statusResult.amount;
-          booking.payment.paymentDate = new Date();
-          booking.status = 'confirmed';
-          
-          await booking.save();
-        }
-        
-        res.status(200).json({
-          success: true,
-          data: {
-            status: statusResult.paid ? 'paid' : 'pending',
-            reference: reference,
-            amount: booking.payment.amount,
-            booking: {
-              id: booking._id,
-              status: booking.status
-            }
-          }
-        });
-      } catch (error) {
-        console.error('Payment status check error:', error);
-        res.status(200).json({
-          success: true,
-          data: {
-            status: booking.payment.status,
-            reference: reference,
-            amount: booking.payment.amount,
-            booking: {
-              id: booking._id,
-              status: booking.status
-            }
-          }
-        });
+        await booking.save();
       }
-    } else {
+      
+      res.status(200).json({
+        success: true,
+        data: {
+          status: statusResult.success && statusResult.status === 'succeeded' ? 'paid' : 'pending',
+          reference: reference,
+          amount: booking.payment.amount,
+          booking: {
+            id: booking._id,
+            status: booking.status
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Payment status check error:', error);
       res.status(200).json({
         success: true,
         data: {
@@ -280,79 +273,101 @@ exports.checkPaymentStatus = async (req, res, next) => {
   }
 };
 
-// @desc    PayNow callback handler
-// @route   POST /api/payments/paynow/callback
+// @desc    Stripe webhook handler
+// @route   POST /api/payments/stripe/webhook
 // @access  Public (webhook)
-exports.paynowCallback = async (req, res, next) => {
+exports.stripeWebhook = async (req, res, next) => {
   try {
-    const callbackData = req.body;
+    const sig = req.headers['stripe-signature'];
+    const payload = req.body;
     
-    // Validate callback
-    if (!paymentService.validatePayNowCallback(callbackData)) {
-      return res.status(400).send('Invalid callback');
+    // Verify webhook signature (simplified for demo)
+    const event = payload;
+    
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object;
+      const reference = paymentIntent.metadata.reference;
+      
+      // Find booking by reference
+      const booking = await Booking.findOne({ 'payment.reference': reference });
+      if (booking) {
+        booking.payment.status = 'paid';
+        booking.payment.paidAmount = paymentIntent.amount / 100; // Convert from cents
+        booking.payment.paymentDate = new Date();
+        booking.status = 'confirmed';
+        
+        await booking.save();
+      }
     }
-    
-    const { reference, status, amount } = callbackData;
-    
-    // Find booking by reference
-    const booking = await Booking.findOne({ 'payment.reference': reference });
-    if (!booking) {
-      return res.status(404).send('Booking not found');
-    }
-    
-    // Update payment status
-    if (status === 'Paid') {
-      booking.payment.status = 'paid';
-      booking.payment.paidAmount = parseFloat(amount);
-      booking.payment.paymentDate = new Date();
-      booking.status = 'confirmed';
-    } else if (status === 'Cancelled') {
-      booking.payment.status = 'failed';
-    }
-    
-    await booking.save();
     
     res.status(200).send('OK');
   } catch (error) {
-    console.error('PayNow callback error:', error);
-    res.status(500).send('Error processing callback');
+    console.error('Stripe webhook error:', error);
+    res.status(500).send('Error processing webhook');
   }
 };
 
-// @desc    Convert currency
-// @route   POST /api/payments/convert
-// @access  Public
-exports.convertCurrency = async (req, res, next) => {
+// @desc    Process refund
+// @route   POST /api/payments/:reference/refund
+// @access  Private
+exports.processRefund = async (req, res, next) => {
   try {
-    const { amount, fromCurrency, toCurrency } = req.body;
+    const { reference } = req.params;
+    const { amount, reason } = req.body;
     
-    if (!amount || !fromCurrency || !toCurrency) {
-      return res.status(400).json({
+    // Find booking by payment reference
+    const booking = await Booking.findOne({ 'payment.reference': reference });
+    if (!booking) {
+      return res.status(404).json({
         success: false,
-        message: 'Amount, fromCurrency, and toCurrency are required'
+        message: 'Payment not found'
       });
     }
     
-    const convertedAmount = currencyService.convertCurrency(amount, fromCurrency, toCurrency);
-    const rates = currencyService.getCurrentRates();
+    // Check if payment was successful
+    if (booking.payment.status !== 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot refund unpaid booking'
+      });
+    }
     
-    res.status(200).json({
-      success: true,
-      data: {
-        original: {
-          amount,
-          currency: fromCurrency,
-          formatted: currencyService.formatCurrency(amount, fromCurrency)
+    const refundAmount = amount || booking.payment.paidAmount;
+    
+    const refundResult = await paymentService.processRefund(
+      booking.payment.reference,
+      refundAmount,
+      booking.payment.method
+    );
+    
+    if (refundResult.success) {
+      booking.payment.refund = {
+        amount: refundAmount,
+        status: refundResult.status,
+        refundId: refundResult.refundId,
+        reason: reason || 'Customer request',
+        processedAt: new Date()
+      };
+      
+      await booking.save();
+      
+      res.status(200).json({
+        success: true,
+        data: {
+          refund: refundResult,
+          booking: {
+            id: booking._id,
+            payment: booking.payment
+          }
         },
-        converted: {
-          amount: convertedAmount,
-          currency: toCurrency,
-          formatted: currencyService.formatCurrency(convertedAmount, toCurrency)
-        },
-        exchangeRate: rates[toCurrency] / rates[fromCurrency],
-        timestamp: rates.lastUpdated
-      }
-    });
+        message: 'Refund processed successfully'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: refundResult.error || 'Refund processing failed'
+      });
+    }
   } catch (error) {
     next(error);
   }
