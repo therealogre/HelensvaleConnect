@@ -45,11 +45,13 @@ app.get('/', (req, res) => {
 const auth = require('./src/routes/auth');
 const vendors = require('./src/routes/vendors');
 const bookings = require('./src/routes/bookings');
+const payments = require('./src/routes/payments');
 
 // Mount routers
 app.use('/api/auth', auth);
 app.use('/api/vendors', vendors);
 app.use('/api/bookings', bookings);
+app.use('/api/payments', payments);
 
 // Health check route
 app.get('/api/health', (req, res) => {
