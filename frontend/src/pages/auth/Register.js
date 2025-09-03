@@ -15,8 +15,19 @@ import {
   Select,
   MenuItem,
   Grid,
+  LinearProgress,
+  Chip,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Person, Email, Phone, Lock } from '@mui/icons-material';
+import { 
+  Visibility, 
+  VisibilityOff, 
+  Person, 
+  Email, 
+  Phone, 
+  Lock,
+  CheckCircle,
+  Cancel 
+} from '@mui/icons-material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -55,6 +66,29 @@ const Register = () => {
   });
 
   const watchRole = watch('role');
+  const watchPassword = watch('password');
+
+  // Password strength calculation
+  const getPasswordStrength = (password) => {
+    if (!password) return { score: 0, label: '', color: 'error' };
+    
+    let score = 0;
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /\d/.test(password),
+      special: /[@$!%*?&]/.test(password)
+    };
+    
+    score = Object.values(checks).filter(Boolean).length;
+    
+    if (score < 3) return { score: score * 20, label: 'Weak', color: 'error' };
+    if (score < 5) return { score: score * 20, label: 'Good', color: 'warning' };
+    return { score: 100, label: 'Strong', color: 'success' };
+  };
+
+  const passwordStrength = getPasswordStrength(watchPassword);
 
   const onSubmit = async (data) => {
     const { confirmPassword, ...userData } = data;
@@ -231,6 +265,26 @@ const Register = () => {
                     ),
                   }}
                 />
+                {watchPassword && (
+                  <Box sx={{ mt: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="caption" sx={{ mr: 1 }}>
+                        Password Strength:
+                      </Typography>
+                      <Chip 
+                        label={passwordStrength.label} 
+                        color={passwordStrength.color}
+                        size="small"
+                      />
+                    </Box>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={passwordStrength.score}
+                      color={passwordStrength.color}
+                      sx={{ height: 6, borderRadius: 3 }}
+                    />
+                  </Box>
+                )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
