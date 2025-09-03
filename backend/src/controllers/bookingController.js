@@ -482,3 +482,118 @@ exports.addFeedback = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get available time slots for a vendor on a specific date
+// @route   GET /api/bookings/available-slots
+// @access  Public
+exports.getAvailableSlots = async (req, res, next) => {
+  try {
+    const { vendorId, date, serviceId } = req.query;
+
+    if (!vendorId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vendor ID and date are required'
+      });
+    }
+
+    // Get vendor and check if exists
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Vendor not found'
+      });
+    }
+
+    // Get service details if provided
+    let service = null;
+    if (serviceId) {
+      service = vendor.services.id(serviceId);
+      if (!service) {
+        return res.status(404).json({
+          success: false,
+          message: 'Service not found'
+        });
+      }
+    }
+
+    const bookingDate = new Date(date);
+    const dayName = bookingDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+    // Check if vendor is open on this day
+    const operatingHour = vendor.operatingHours.find(oh => oh.day === dayName);
+    if (!operatingHour || !operatingHour.isOpen) {
+      return res.status(200).json({
+        success: true,
+        slots: [],
+        message: 'Vendor is closed on this day'
+      });
+    }
+
+    // Get existing bookings for this date
+    const existingBookings = await Booking.find({
+      vendor: vendorId,
+      bookingDate: {
+        $gte: new Date(bookingDate.setHours(0, 0, 0, 0)),
+        $lt: new Date(bookingDate.setHours(23, 59, 59, 999))
+      },
+      status: { $in: ['confirmed', 'in_progress'] }
+    });
+
+    // Generate time slots
+    const slots = [];
+    const serviceDuration = service ? service.duration : 60; // Default 60 minutes
+    
+    // Parse operating hours
+    const [openHour, openMinute] = operatingHour.openTime.split(':').map(Number);
+    const [closeHour, closeMinute] = operatingHour.closeTime.split(':').map(Number);
+
+    let currentTime = new Date(bookingDate);
+    currentTime.setHours(openHour, openMinute, 0, 0);
+
+    const endTime = new Date(bookingDate);
+    endTime.setHours(closeHour, closeMinute, 0, 0);
+
+    while (currentTime.getTime() + (serviceDuration * 60 * 1000) <= endTime.getTime()) {
+      const slotStart = currentTime.toTimeString().slice(0, 5); // HH:MM format
+      const slotEndTime = new Date(currentTime.getTime() + (serviceDuration * 60 * 1000));
+      const slotEnd = slotEndTime.toTimeString().slice(0, 5);
+
+      // Check if this slot conflicts with existing bookings
+      const hasConflict = existingBookings.some(booking => {
+        const bookingStart = booking.timeSlot.startTime;
+        const bookingEnd = booking.timeSlot.endTime;
+        
+        // Check for time overlap
+        return (slotStart < bookingEnd && slotEnd > bookingStart);
+      });
+
+      slots.push({
+        startTime: slotStart,
+        endTime: slotEnd,
+        available: !hasConflict
+      });
+
+      // Move to next slot (30-minute intervals)
+      currentTime.setMinutes(currentTime.getMinutes() + 30);
+    }
+
+    res.status(200).json({
+      success: true,
+      slots: slots.filter(slot => slot.available), // Only return available slots
+      date: date,
+      vendor: {
+        id: vendor._id,
+        name: vendor.businessName
+      },
+      service: service ? {
+        id: service._id,
+        name: service.name,
+        duration: service.duration
+      } : null
+    });
+  } catch (error) {
+    next(error);
+  }
+};

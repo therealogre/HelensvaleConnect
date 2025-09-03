@@ -8,6 +8,7 @@ const {
   getVendorsByLocation,
   uploadVendorPhoto
 } = require('../controllers/vendorController');
+const { vendorPhotoUpload, handleUploadError } = require('../middleware/upload');
 
 const { validateVendorRegistration } = require('../middleware/validation');
 const { protect, authorize } = require('../middleware/auth');

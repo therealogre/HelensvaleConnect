@@ -2,6 +2,7 @@ const Vendor = require('../models/Vendor');
 const User = require('../models/User');
 const { validationResult } = require('express-validator');
 const path = require('path');
+const { getFileUrl, deleteFile } = require('../middleware/upload');
 
 // @desc    Get all vendors
 // @route   GET /api/vendors

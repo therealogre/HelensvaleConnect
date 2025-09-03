@@ -6,7 +6,8 @@ const {
   updateBooking,
   cancelBooking,
   checkInBooking,
-  addFeedback
+  addFeedback,
+  getAvailableSlots
 } = require('../controllers/bookingController');
 
 const { validateBooking } = require('../middleware/validation');
@@ -16,6 +17,9 @@ const router = express.Router();
 
 // All routes are protected
 router.use(protect);
+
+// Public routes (available slots)
+router.get('/available-slots', getAvailableSlots);
 
 // Customer and vendor routes
 router.get('/', getBookings);
