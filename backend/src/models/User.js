@@ -36,7 +36,31 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['customer', 'vendor', 'admin'],
-    default: 'customer'
+    default: 'vendor'
+  },
+  businessType: {
+    type: String,
+    enum: ['beauty_wellness', 'automotive', 'food_beverage', 'home_services', 'professional_services', 'retail', 'health_fitness', 'education', 'technology', 'other'],
+    required: function() { return this.role === 'vendor'; }
+  },
+  subscriptionPlan: {
+    type: String,
+    enum: ['starter', 'professional', 'enterprise'],
+    default: null
+  },
+  subscriptionStatus: {
+    type: String,
+    enum: ['inactive', 'active', 'cancelled', 'past_due'],
+    default: 'inactive'
+  },
+  subscriptionExpiry: {
+    type: Date,
+    default: null
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed'],
+    default: 'pending'
   },
   avatar: {
     type: String,
@@ -125,6 +149,20 @@ userSchema.methods.getResetPasswordToken = function() {
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
   
   return resetToken;
+};
+
+// Generate email verification token
+userSchema.methods.getEmailVerificationToken = function() {
+  const verificationToken = crypto.randomBytes(20).toString('hex');
+  
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+    
+  this.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  
+  return verificationToken;
 };
 
 module.exports = mongoose.model('User', userSchema);

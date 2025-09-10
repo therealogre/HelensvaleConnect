@@ -90,7 +90,7 @@ exports.calculatePayment = async (req, res, next) => {
   }
 };
 
-// @desc    Create payment for booking
+// @desc    Create payment for subscription plan
 // @route   POST /api/payments/create
 // @access  Private
 exports.createPayment = async (req, res, next) => {
@@ -104,7 +104,41 @@ exports.createPayment = async (req, res, next) => {
       });
     }
     
-    const { bookingId, paymentMethod } = req.body;
+    const { planName, billingCycle, amount, currency = 'USD', bookingId } = req.body;
+    
+    // Handle subscription payment
+    if (planName && !bookingId) {
+      const paymentData = {
+        amount: amount,
+        currency: currency,
+        reference: `SUBSCRIPTION_${req.user.id}_${Date.now()}`,
+        email: req.user.email,
+        description: `${planName} plan subscription (${billingCycle})`,
+        planName: planName,
+        billingCycle: billingCycle,
+        userId: req.user.id
+      };
+      
+      // Create PayNow payment for subscription
+      const paymentResult = await paymentService.createPayNowPayment(paymentData);
+      
+      return res.status(201).json({
+        success: true,
+        data: {
+          payment: paymentResult,
+          redirectUrl: paymentResult.redirectUrl
+        },
+        message: 'Subscription payment initiated successfully'
+      });
+    }
+    
+    // Handle booking payment (existing logic)
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Either planName or bookingId is required'
+      });
+    }
     
     // Get booking details
     const booking = await Booking.findById(bookingId).populate('vendor customer');
@@ -142,27 +176,13 @@ exports.createPayment = async (req, res, next) => {
     
     let paymentResult;
     
-    switch (paymentMethod) {
-      case 'stripe':
-        paymentResult = await paymentService.createStripePayment(paymentData);
-        break;
-      case 'paypal':
-        paymentResult = await paymentService.createPayPalPayment(paymentData);
-        break;
-      case 'bank_transfer':
-        paymentResult = await paymentService.createBankTransferPayment(paymentData);
-        break;
-      default:
-        return res.status(400).json({
-          success: false,
-          message: 'Unsupported payment method'
-        });
-    }
+    // Default to PayNow for booking payments
+    paymentResult = await paymentService.createPayNowPayment(paymentData);
     
     // Update booking with payment details
     booking.payment = {
       ...booking.payment,
-      method: paymentMethod,
+      method: 'paynow',
       status: 'pending',
       reference: paymentResult.reference,
       amount: paymentResult.amount

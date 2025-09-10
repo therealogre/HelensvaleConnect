@@ -1,46 +1,57 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Dashboard from './pages/Dashboard';
-import VendorProfile from './pages/vendor/VendorProfile';
-import BookingPage from './pages/BookingPage';
-import VendorList from './pages/VendorList';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import DashboardLayout from './components/Dashboard/DashboardLayout';
+import Welcome from './pages/Dashboard/Welcome';
+import Pricing from './pages/Dashboard/Pricing';
+import StoreManagement from './pages/Dashboard/StoreManagement';
+import './App.css';
+
+// Layout component to conditionally render Navbar and Footer
+const Layout = ({ children }) => {
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/dashboard');
+
+  return (
+    <>
+      {!isDashboard && <Navbar />}
+      <main>{children}</main>
+      {!isDashboard && <Footer />}
+    </>
+  );
+};
 
 function App() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
-      <Box component="main" sx={{ flexGrow: 1, pt: 8 }}>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/vendors" element={<VendorList />} />
-          <Route path="/vendors/:id" element={<VendorProfile />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/book/:vendorId" element={
-            <ProtectedRoute>
-              <BookingPage />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </Box>
-      <Footer />
-    </Box>
+    <AuthProvider>
+      <div className="App">
+        <Layout>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Dashboard routes (handled by DashboardLayout) */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Welcome />} />
+              <Route path="welcome" element={<Welcome />} />
+              <Route path="pricing" element={<Pricing />} />
+              <Route path="store" element={<StoreManagement />} />
+            </Route>
+          </Routes>
+        </Layout>
+      </div>
+    </AuthProvider>
   );
 }
+
+export default App;
+
 
 export default App;
