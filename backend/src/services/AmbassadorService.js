@@ -133,9 +133,9 @@ class AmbassadorService {
     const bonuses = {
       bronze: { type: 'discount', value: 10, description: '10% off first booking' },
       silver: { type: 'discount', value: 15, description: '15% off first booking' },
-      gold: { type: 'credit', value: 50, description: 'R50 credit for first booking' },
-      platinum: { type: 'credit', value: 75, description: 'R75 credit for first booking' },
-      diamond: { type: 'credit', value: 100, description: 'R100 credit for first booking' }
+      gold: { type: 'credit', value: 10, description: '$10 USD credit for first booking' },
+      platinum: { type: 'credit', value: 15, description: '$15 USD credit for first booking' },
+      diamond: { type: 'credit', value: 20, description: '$20 USD credit for first booking' }
     };
 
     return bonuses[ambassadorTier] || bonuses.bronze;
@@ -337,15 +337,15 @@ class AmbassadorService {
           { channel: 'WhatsApp', clicks: 89, conversions: 4 }
         ],
         recentReferrals: [
-          { date: '2024-01-10', user: 'user***@email.com', status: 'converted', earnings: 'R45.00' },
-          { date: '2024-01-09', user: 'user***@email.com', status: 'pending', earnings: 'R0.00' },
-          { date: '2024-01-08', user: 'user***@email.com', status: 'converted', earnings: 'R32.50' }
+          { date: '2024-01-10', user: 'user***@email.com', status: 'converted', earnings: '$8.50 USD' },
+          { date: '2024-01-09', user: 'user***@email.com', status: 'pending', earnings: '$0.00 USD' },
+          { date: '2024-01-08', user: 'user***@email.com', status: 'converted', earnings: '$6.25 USD' }
         ],
         monthlyTrend: [
-          { month: 'Oct', referrals: 8, earnings: 234.50 },
-          { month: 'Nov', referrals: 12, earnings: 387.20 },
-          { month: 'Dec', referrals: 15, earnings: 456.80 },
-          { month: 'Jan', referrals: 18, earnings: 523.40 }
+          { month: 'Oct', referrals: 8, earnings: 45.50 },
+          { month: 'Nov', referrals: 12, earnings: 72.20 },
+          { month: 'Dec', referrals: 15, earnings: 86.80 },
+          { month: 'Jan', referrals: 18, earnings: 98.40 }
         ]
       };
 
@@ -396,7 +396,7 @@ class AmbassadorService {
         success: true,
         offer,
         promotionalContent: {
-          headline: `Exclusive ${discountValue}${discountType === 'percentage' ? '%' : 'R'} Off!`,
+          headline: `Exclusive ${discountValue}${discountType === 'percentage' ? '%' : ' USD'} Off!`,
           description: `Limited time offer from your trusted ambassador. Use code ${offer.code}`,
           urgency: `Only ${maxUses} uses available - expires ${new Date(validUntil).toLocaleDateString()}`
         }
@@ -421,7 +421,7 @@ class AmbassadorService {
           name: 'Sarah M.',
           tier: 'diamond',
           referrals: 45,
-          earnings: 2340.50,
+          earnings: 450.50,
           badge: '🏆'
         },
         {
@@ -430,7 +430,7 @@ class AmbassadorService {
           name: 'Mike T.',
           tier: 'platinum',
           referrals: 38,
-          earnings: 1890.25,
+          earnings: 365.25,
           badge: '🥈'
         },
         {
@@ -439,7 +439,7 @@ class AmbassadorService {
           name: 'Lisa K.',
           tier: 'gold',
           referrals: 32,
-          earnings: 1456.75,
+          earnings: 285.75,
           badge: '🥉'
         },
         {
@@ -448,7 +448,7 @@ class AmbassadorService {
           name: 'John D.',
           tier: 'gold',
           referrals: 28,
-          earnings: 1234.00,
+          earnings: 240.00,
           badge: '⭐'
         },
         {
@@ -457,7 +457,7 @@ class AmbassadorService {
           name: 'Emma R.',
           tier: 'silver',
           referrals: 24,
-          earnings: 987.50,
+          earnings: 195.50,
           badge: '⭐'
         }
       ];
@@ -468,9 +468,9 @@ class AmbassadorService {
         period,
         totalAmbassadors: 156,
         prizes: {
-          first: 'R500 bonus + Exclusive HelensvaleConnect merchandise',
-          second: 'R300 bonus + Priority support for 3 months',
-          third: 'R200 bonus + Featured ambassador spotlight'
+          first: '$95 USD bonus + Exclusive HelensvaleConnect merchandise',
+          second: '$60 USD bonus + Priority support for 3 months',
+          third: '$40 USD bonus + Featured ambassador spotlight'
         }
       };
     } catch (error) {

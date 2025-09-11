@@ -91,11 +91,11 @@ const Partnership = () => {
   useEffect(() => {
     // Fetch leaderboard data
     setLeaderboard([
-      { rank: 1, name: 'Sarah M.', tier: 'diamond', referrals: 145, earnings: 'R12,340', badge: '🏆' },
-      { rank: 2, name: 'Mike T.', tier: 'platinum', referrals: 89, earnings: 'R8,950', badge: '🥈' },
-      { rank: 3, name: 'Lisa K.', tier: 'gold', referrals: 67, earnings: 'R6,780', badge: '🥉' },
-      { rank: 4, name: 'John D.', tier: 'gold', referrals: 45, earnings: 'R4,560', badge: '⭐' },
-      { rank: 5, name: 'Emma R.', tier: 'silver', referrals: 32, earnings: 'R3,200', badge: '⭐' }
+      { rank: 1, name: 'Sarah M.', tier: 'diamond', referrals: 145, earnings: '$2,340 USD', badge: '🏆' },
+      { rank: 2, name: 'Mike T.', tier: 'platinum', referrals: 89, earnings: '$1,695 USD', badge: '🥈' },
+      { rank: 3, name: 'Lisa K.', tier: 'gold', referrals: 67, earnings: '$1,285 USD', badge: '🥉' },
+      { rank: 4, name: 'John D.', tier: 'gold', referrals: 45, earnings: '$865 USD', badge: '⭐' },
+      { rank: 5, name: 'Emma R.', tier: 'silver', referrals: 32, earnings: '$605 USD', badge: '⭐' }
     ]);
   }, []);
 
@@ -288,7 +288,7 @@ const Partnership = () => {
             Join the HelensvaleConnect Ambassador Program
           </Typography>
           <Typography variant="h5" className="hero-subtitle" color="textSecondary" paragraph>
-            Earn up to 20% commission while helping your community discover amazing local services
+            Earn up to 20% USD commission while helping your Helensvale, Borrowdale community discover amazing local services
           </Typography>
           <Button 
             variant="contained" 
@@ -308,7 +308,7 @@ const Partnership = () => {
               <CardContent>
                 <MonetizationOn className="benefit-icon" />
                 <Typography variant="h6">Earn Commission</Typography>
-                <Typography>Up to 20% on every successful referral</Typography>
+                <Typography>Up to 20% USD on every successful referral</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -432,11 +432,11 @@ const Partnership = () => {
                   <Typography variant="h6">Sarah M.</Typography>
                   <Typography variant="body2" color="textSecondary">Diamond Ambassador</Typography>
                   <Typography paragraph>
-                    "In just 6 months, I've earned over R50,000 in commissions! The platform makes it so easy to share with my network."
+                    "In just 6 months, I've earned over $9,500 USD in commissions! The platform makes it so easy to share with my network in Helensvale and Borrowdale."
                   </Typography>
                   <Box display="flex" alignItems="center">
                     <Star className="star-icon" />
-                    <Typography>R50,000+ earned</Typography>
+                    <Typography>$9,500+ USD earned</Typography>
                   </Box>
                 </CardContent>
               </Card>

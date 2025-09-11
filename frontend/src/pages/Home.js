@@ -38,26 +38,26 @@ import './Home.css';
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('Helensvale, QLD');
+  const [location, setLocation] = useState('Helensvale, Borrowdale, Harare');
   const [featuredServices, setFeaturedServices] = useState([]);
   const [stats, setStats] = useState({
     totalVendors: 2850,
     totalBookings: 47200,
     averageRating: 4.9,
     activeUsers: 18500,
-    savedAmount: 'R2.4M',
+    savedAmount: '$240K USD',
     responseTime: '< 15min'
   });
 
   useEffect(() => {
     // Simulate fetching featured services
     setFeaturedServices([
-      { id: 1, name: 'Hair & Beauty', icon: '💇‍♀️', count: 485, trending: true, avgPrice: 'R45-120', description: 'Salons, barbershops, nail care' },
-      { id: 2, name: 'Home Services', icon: '🏠', count: 389, trending: false, avgPrice: 'R80-250', description: 'Plumbing, electrical, cleaning' },
-      { id: 3, name: 'Health & Wellness', icon: '🏥', count: 256, trending: true, avgPrice: 'R90-180', description: 'Massage, therapy, fitness' },
-      { id: 4, name: 'Automotive', icon: '🚗', count: 234, trending: false, avgPrice: 'R150-500', description: 'Car wash, repairs, maintenance' },
-      { id: 5, name: 'Food & Catering', icon: '🍽️', count: 398, trending: true, avgPrice: 'R25-85', description: 'Catering, chefs, food delivery' },
-      { id: 6, name: 'Business Services', icon: '💼', count: 187, trending: true, avgPrice: 'R120-400', description: 'Accounting, legal, consulting' }
+      { id: 1, name: 'Hair & Beauty', icon: '💇‍♀️', count: 485, trending: true, avgPrice: '$8-25 USD', description: 'Salons, barbershops, nail care' },
+      { id: 2, name: 'Home Services', icon: '🏠', count: 389, trending: false, avgPrice: '$15-45 USD', description: 'Plumbing, electrical, cleaning' },
+      { id: 3, name: 'Health & Wellness', icon: '🏥', count: 256, trending: true, avgPrice: '$18-35 USD', description: 'Massage, therapy, fitness' },
+      { id: 4, name: 'Automotive', icon: '🚗', count: 234, trending: false, avgPrice: '$25-85 USD', description: 'Car wash, repairs, maintenance' },
+      { id: 5, name: 'Food & Catering', icon: '🍽️', count: 398, trending: true, avgPrice: '$5-18 USD', description: 'Catering, chefs, food delivery' },
+      { id: 6, name: 'Business Services', icon: '💼', count: 187, trending: true, avgPrice: '$25-75 USD', description: 'Accounting, legal, consulting' }
     ]);
   }, []);
 
@@ -97,8 +97,8 @@ const Home = () => {
             </Typography>
             
             <Typography variant="h5" className="hero-subtitle">
-              Join 18,500+ South Africans connecting with trusted local professionals. 
-              <Box component="span" className="highlight-text">Book instantly, pay with EcoCash/OneMoney, save up to 40%</Box>
+              Join 18,500+ Zimbabweans connecting with trusted local professionals in Helensvale, Borrowdale and across Harare. 
+              <Box component="span" className="highlight-text">Book instantly, pay with EcoCash USD, save up to 40%</Box>
             </Typography>
             
             {/* Social Proof Bar */}
@@ -165,9 +165,9 @@ const Home = () => {
             {/* Popular Searches - African Context */}
             <Box className="popular-searches">
               <Typography variant="body2" color="text.secondary">
-                Trending in South Africa: 
+                Trending in Helensvale & Borrowdale: 
               </Typography>
-              {['Hair Braiding', 'Domestic Worker', 'Taxi Services', 'Mobile Mechanic', 'Catering', 'Security Services'].map((term) => (
+              {['Hair Braiding', 'Domestic Worker', 'Kombi Services', 'Mobile Mechanic', 'Catering', 'Security Services'].map((term) => (
                 <Chip 
                   key={term} 
                   label={term} 
@@ -273,9 +273,9 @@ const Home = () => {
                 <Box className="trust-feature">
                   <SecurityIcon color="primary" className="trust-icon" />
                   <Box>
-                    <Typography variant="h6">Secure Payments</Typography>
+                    <Typography variant="h6">Secure USD Payments</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      EcoCash, OneMoney, and card payments with buyer protection
+                      EcoCash USD, NetOne OneMoney, and international card payments with buyer protection
                     </Typography>
                   </Box>
                 </Box>
@@ -369,8 +369,8 @@ const Home = () => {
               image: "/images/provider-1.jpg",
               verified: true,
               responseTime: "< 1 hour",
-              location: "Helensvale",
-              price: "From $45"
+              location: "Helensvale, Borrowdale",
+              price: "From $8 USD"
             },
             {
               id: 2,
@@ -381,8 +381,8 @@ const Home = () => {
               image: "/images/provider-2.jpg",
               verified: true,
               responseTime: "< 2 hours",
-              location: "Gold Coast",
-              price: "From $80"
+              location: "Borrowdale, Harare",
+              price: "From $15 USD"
             },
             {
               id: 3,
@@ -393,8 +393,8 @@ const Home = () => {
               image: "/images/provider-3.jpg",
               verified: true,
               responseTime: "< 30 mins",
-              location: "Southport",
-              price: "From $90"
+              location: "Helensvale Shopping Centre",
+              price: "From $18 USD"
             }
           ].map((provider) => (
             <Grid item xs={12} sm={6} md={4} key={provider.id}>
@@ -486,7 +486,7 @@ const Home = () => {
               {
                 step: 3,
                 title: "Pay Securely",
-                description: "Pay with EcoCash, OneMoney, or card. Your payment is protected until service completion",
+                description: "Pay with EcoCash USD, NetOne OneMoney, or international card. Your payment is protected until service completion",
                 icon: "💳"
               },
               {
@@ -556,12 +556,12 @@ const Home = () => {
                     Grow Your Business
                   </Typography>
                   <Typography variant="h6" color="text.secondary" className="cta-subtitle">
-                    Join thousands of professionals earning more with Helensvale Connect
+                    Join hundreds of professionals in Helensvale, Borrowdale earning USD with Helensvale Connect
                   </Typography>
                   <Box className="cta-features">
                     <Typography variant="body2">✓ More customers</Typography>
                     <Typography variant="body2">✓ Easy booking management</Typography>
-                    <Typography variant="body2">✓ Mobile money integration</Typography>
+                    <Typography variant="body2">✓ EcoCash USD integration</Typography>
                     <Typography variant="body2">✓ Marketing tools included</Typography>
                   </Box>
                   <Button 

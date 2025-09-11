@@ -219,10 +219,11 @@ class PaymentService {
   }
 
   // Calculate payment breakdown with fees
-  calculatePaymentBreakdown(amount, method = 'stripe', currency = 'ZAR') {
+  calculatePaymentBreakdown(amount, method = 'stripe', currency = 'USD') {
     const fees = {
-      ecocash: 0.025,
+      ecocash: 0.02,
       onemoney: 0.025,
+      telecash: 0.03,
       stripe: 0.032,
       bank_transfer: 0,
       cash: 0
@@ -246,14 +247,14 @@ class PaymentService {
     try {
       const {
         amount,
-        currency = 'ZAR',
+        currency = 'USD',
         reference,
         phone,
         description,
         bookingId
       } = paymentData;
 
-      // EcoCash integration for South Africa
+      // EcoCash integration for Zimbabwe USD transactions
       const ecoCashData = {
         id: reference,
         amount: amount,
@@ -272,10 +273,11 @@ class PaymentService {
         paymentMethod: 'ecocash',
         status: 'pending',
         instructions: {
-          message: `Dial *151# and follow prompts to pay R${amount} to merchant code 123456`,
-          merchantCode: '123456',
-          amount: `R${amount}`,
-          reference: reference
+          message: `Dial *151# and follow prompts to pay $${amount} USD to merchant code 456789`,
+          merchantCode: '456789',
+          amount: `$${amount} USD`,
+          reference: reference,
+          note: 'EcoCash USD transactions available - guaranteed USD cash out'
         }
       };
     } catch (error) {
@@ -287,12 +289,12 @@ class PaymentService {
     }
   }
 
-  // Create OneMoney payment (South African mobile money)
+  // Create NetOne OneMoney payment (Zimbabwe mobile money)
   async createOneMoneyPayment(paymentData) {
     try {
       const {
         amount,
-        currency = 'ZAR',
+        currency = 'USD',
         reference,
         phone,
         description,
@@ -307,10 +309,11 @@ class PaymentService {
         paymentMethod: 'onemoney',
         status: 'pending',
         instructions: {
-          message: `Send R${amount} to OneMoney merchant 654321 with reference ${reference}`,
-          merchantCode: '654321',
-          amount: `R${amount}`,
-          reference: reference
+          message: `Send $${amount} USD to NetOne OneMoney merchant 789123 with reference ${reference}`,
+          merchantCode: '789123',
+          amount: `$${amount} USD`,
+          reference: reference,
+          note: 'NetOne OneMoney USD transactions supported'
         }
       };
     } catch (error) {
@@ -349,53 +352,66 @@ class PaymentService {
       {
         id: 'ecocash',
         name: 'EcoCash',
-        description: 'Mobile money payment via EcoCash',
-        fee: '2.5%',
+        description: 'Mobile money payment via EcoCash (USD)',
+        fee: '2.0%',
         processingTime: 'Instant',
         icon: 'phone_android',
-        supported: ['ZAR'],
+        supported: ['USD'],
         local: true,
-        popular: true
+        popular: true,
+        provider: 'Econet Wireless'
       },
       {
         id: 'onemoney',
-        name: 'OneMoney',
-        description: 'Mobile money payment via OneMoney',
+        name: 'NetOne OneMoney',
+        description: 'Mobile money payment via NetOne OneMoney',
         fee: '2.5%',
         processingTime: 'Instant',
         icon: 'phone_android',
-        supported: ['ZAR'],
+        supported: ['USD'],
         local: true,
-        popular: true
+        popular: true,
+        provider: 'NetOne'
+      },
+      {
+        id: 'telecash',
+        name: 'Telecel Cash',
+        description: 'Mobile money payment via Telecel Cash',
+        fee: '3.0%',
+        processingTime: 'Instant',
+        icon: 'phone_android',
+        supported: ['USD'],
+        local: true,
+        provider: 'Telecel Zimbabwe'
       },
       {
         id: 'stripe',
         name: 'Credit/Debit Card',
-        description: 'Visa, Mastercard, American Express',
+        description: 'International Visa, Mastercard, American Express',
         fee: '3.2%',
         processingTime: 'Instant',
         icon: 'credit_card',
-        supported: ['ZAR', 'USD'],
+        supported: ['USD'],
         local: false
       },
       {
         id: 'bank_transfer',
         name: 'Bank Transfer',
-        description: 'Direct bank transfer (EFT)',
+        description: 'Direct USD bank transfer (RTGS)',
         fee: 'Free',
         processingTime: '1-2 business days',
         icon: 'account_balance',
-        supported: ['ZAR'],
+        supported: ['USD'],
         local: true
       },
       {
         id: 'cash',
         name: 'Cash on Service',
-        description: 'Pay cash when service is delivered',
+        description: 'Pay USD cash when service is delivered',
         fee: 'Free',
         processingTime: 'On delivery',
         icon: 'money',
-        supported: ['ZAR'],
+        supported: ['USD'],
         local: true
       }
     ];

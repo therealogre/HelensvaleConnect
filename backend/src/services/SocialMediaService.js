@@ -32,15 +32,42 @@ class SocialMediaService {
   async generatePostContent(vendor, service, type = 'promotion') {
     const templates = {
       promotion: {
-        facebook: `🌟 Special Offer from ${vendor.businessName}! 🌟\n\n${service.name} - Starting from R${service.price}\n\n📍 ${vendor.location.address}\n📞 ${vendor.contact.phone}\n\n#HelensvaleConnect #LocalBusiness #${vendor.category}`,
+        facebook: `🌟 Special Offer from ${vendor.businessName}! 🌟
+
+${service.name} - Starting from $${service.price} USD
+
+📍 ${vendor.location.address}
+📞 ${vendor.contact.phone}
+
+#HelensvaleConnect #LocalBusiness #${vendor.category} #Zimbabwe #Harare #Borrowdale`,
         
-        instagram: `✨ ${vendor.businessName} ✨\n\n${service.name} 💫\nFrom R${service.price}\n\n📍 ${vendor.location.address}\n\n#HelensvaleConnect #LocalServices #${vendor.category} #SouthAfrica #LocalBusiness`,
+        instagram: `✨ ${vendor.businessName} ✨
+
+${service.name} 💫
+From $${service.price} USD
+
+📍 ${vendor.location.address}
+
+#HelensvaleConnect #LocalServices #${vendor.category} #Zimbabwe #Harare #Borrowdale #LocalBusiness`,
         
-        twitter: `🔥 ${vendor.businessName}\n${service.name} - R${service.price}\n📍 ${vendor.location.address}\nBook now on HelensvaleConnect! #LocalServices #${vendor.category}`,
+        twitter: `🔥 ${vendor.businessName}
+${service.name} - $${service.price} USD
+📍 ${vendor.location.address}
+Book now on HelensvaleConnect! #LocalServices #${vendor.category} #Zimbabwe #Harare`,
         
-        tiktok: `Check out ${vendor.businessName}! 🎯\n${service.name} for just R${service.price}\nFind them on HelensvaleConnect 📱\n#LocalBusiness #${vendor.category} #SouthAfrica`,
+        tiktok: `Check out ${vendor.businessName}! 🎯
+${service.name} for just $${service.price} USD
+Find them on HelensvaleConnect 📱
+#LocalBusiness #${vendor.category} #Zimbabwe #Harare #Borrowdale`,
         
-        linkedin: `Professional ${service.name} services available at ${vendor.businessName}.\n\nStarting from R${service.price}\nLocation: ${vendor.location.address}\n\nConnect with local businesses through HelensvaleConnect.\n\n#ProfessionalServices #LocalBusiness #${vendor.category}`
+        linkedin: `Professional ${service.name} services available at ${vendor.businessName}.
+
+Starting from $${service.price} USD
+Location: ${vendor.location.address}
+
+Connect with local businesses through HelensvaleConnect - Zimbabwe's premier marketplace.
+
+#ProfessionalServices #LocalBusiness #${vendor.category} #Zimbabwe #Harare #Borrowdale`
       },
       
       showcase: {
@@ -246,7 +273,7 @@ class SocialMediaService {
 
   // Generate hashtags for content
   generateHashtags(category, location, serviceType) {
-    const baseHashtags = ['#HelensvaleConnect', '#LocalBusiness', '#SouthAfrica'];
+    const baseHashtags = ['#HelensvaleConnect', '#LocalBusiness', '#Zimbabwe', '#Harare', '#Borrowdale'];
     const categoryHashtags = {
       cleaning: ['#CleaningServices', '#HomeCleaning', '#ProfessionalCleaning'],
       beauty: ['#BeautyServices', '#Salon', '#BeautyCare'],
@@ -297,13 +324,13 @@ class SocialMediaService {
             type: 'seasonal_promotion',
             title: 'Spring Cleaning Special',
             estimatedReach: '2,500-4,000',
-            suggestedBudget: 'R150-300'
+            suggestedBudget: '$25-50 USD'
           },
           {
             type: 'customer_showcase',
             title: 'Happy Customer Stories',
             estimatedReach: '1,800-3,200',
-            suggestedBudget: 'R100-200'
+            suggestedBudget: '$18-35 USD'
           }
         ]
       };

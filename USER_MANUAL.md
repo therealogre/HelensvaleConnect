@@ -14,15 +14,15 @@
 
 ## Introduction
 
-HelensvaleConnect is a comprehensive marketplace platform designed for the South African market, connecting customers with local service providers. The platform features advanced booking systems, integrated payments, social media marketing tools, and a robust ambassador referral program.
+HelensvaleConnect is a comprehensive marketplace platform designed for the Zimbabwean market, connecting customers with local service providers in Helensvale, Borrowdale, and across Harare. The platform features advanced booking systems, integrated USD payments, social media marketing tools, and a robust ambassador referral program.
 
 ### Key Features
 - **Multi-role Authentication**: Customers, Vendors, and Administrators
 - **Advanced Booking System**: Real-time availability, pricing calculations, notifications
-- **Payment Integration**: EcoCash, OneMoney, Credit Cards, Bank Transfers, Cash on Service
+- **Payment Integration**: EcoCash USD, NetOne OneMoney, Telecel Cash, International Credit Cards, Bank Transfers, Cash on Service
 - **Social Media Marketing**: Automated posting to Facebook, Instagram, TikTok, Twitter, LinkedIn
 - **Ambassador Program**: Multi-tier referral system with special features
-- **Mobile-First Design**: Optimized for African mobile usage patterns
+- **Mobile-First Design**: Optimized for Zimbabwean mobile usage patterns with USD transactions
 
 ## Getting Started
 
@@ -249,11 +249,11 @@ frontend/
 ## Ambassador Program
 
 ### Tier System
-1. **Bronze** (0+ referrals): 5% commission, basic features
-2. **Silver** (10+ referrals): 8% commission, priority support
-3. **Gold** (25+ referrals): 12% commission, exclusive events
-4. **Platinum** (50+ referrals): 15% commission, co-marketing opportunities
-5. **Diamond** (100+ referrals): 20% commission, revenue sharing
+1. **Bronze** (0+ referrals): 5% USD commission, basic features
+2. **Silver** (10+ referrals): 8% USD commission, priority support
+3. **Gold** (25+ referrals): 12% USD commission, exclusive events
+4. **Platinum** (50+ referrals): 15% USD commission, co-marketing opportunities
+5. **Diamond** (100+ referrals): 20% USD commission, revenue sharing
 
 ### Ambassador Features
 - **Custom Referral Codes**: Unique tracking codes
@@ -291,30 +291,36 @@ frontend/
 
 ### Supported Payment Methods
 
-1. **EcoCash** (Most Popular)
-   - Instant mobile money payments
-   - 2.5% processing fee
-   - Instructions: Dial *151# and follow prompts
+1. **EcoCash USD** (Most Popular)
+   - Instant mobile money payments in USD
+   - 2.0% processing fee
+   - Instructions: Dial *151# and follow prompts to pay USD
+   - Guaranteed USD cash out available
 
-2. **OneMoney**
-   - Mobile money alternative
+2. **NetOne OneMoney**
+   - NetOne mobile money in USD
    - 2.5% processing fee
-   - Send to merchant code with reference
+   - Send USD to merchant code with reference
 
-3. **Credit/Debit Cards**
+3. **International Credit/Debit Cards**
    - Visa, Mastercard, American Express
    - 3.2% processing fee
-   - Instant processing via Stripe
+   - Instant USD processing via Stripe
 
-4. **Bank Transfer (EFT)**
-   - Direct bank transfers
+3. **Telecel Cash**
+   - Telecel Zimbabwe mobile money
+   - 3.0% processing fee
+   - USD transactions supported
+
+5. **Bank Transfer (RTGS)**
+   - Direct USD bank transfers
    - No processing fees
    - 1-2 business day processing
 
-5. **Cash on Service**
-   - Pay when service is delivered
+6. **Cash on Service**
+   - Pay USD cash when service is delivered
    - No processing fees
-   - Popular for local services
+   - Popular for local services in Helensvale and Borrowdale
 
 ### Payment Flow
 1. **Service Selection**: Customer chooses service and time
@@ -326,9 +332,11 @@ frontend/
 
 ### Fee Structure
 ```
-EcoCash/OneMoney: 2.5% of transaction
-Credit Cards: 3.2% of transaction
-Bank Transfer: Free
+EcoCash USD: 2.0% of transaction
+NetOne OneMoney: 2.5% of transaction
+Telecel Cash: 3.0% of transaction
+International Credit Cards: 3.2% of transaction
+Bank Transfer (RTGS): Free
 Cash on Service: Free
 ```
 
@@ -563,7 +571,7 @@ Error: Referral code not found
 
 ## Conclusion
 
-HelensvaleConnect is a comprehensive marketplace platform designed to revolutionize local service discovery in South Africa. With its advanced features, social media integration, and ambassador program, it provides a complete solution for both service providers and customers.
+HelensvaleConnect is a comprehensive marketplace platform designed to revolutionize local service discovery in Zimbabwe, starting with Helensvale, Borrowdale, and expanding across Harare. With its advanced USD payment features, social media integration, and ambassador program, it provides a complete solution for both service providers and customers in the Zimbabwean market.
 
 For additional support or feature requests, please contact our development team or submit an issue on our GitHub repository.
 
