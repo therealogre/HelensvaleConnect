@@ -47,6 +47,9 @@ const vendors = require('./src/routes/vendors');
 const bookings = require('./src/routes/bookings');
 const payments = require('./src/routes/payments');
 
+// Error handling middleware
+const { errorHandler, notFound } = require('./src/middleware/error');
+
 // Mount routers
 app.use('/api/auth', auth);
 app.use('/api/vendors', vendors);
@@ -62,23 +65,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : {}
-  });
-});
-
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    message: 'Route not found'
-  });
+app.use(notFound);
+
+// Error handler
+app.use(errorHandler);
+
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Helensvale Connect server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.error(`Error: ${err.message}`);
+  // Close server & exit process
+  server.close(() => process.exit(1));
 });

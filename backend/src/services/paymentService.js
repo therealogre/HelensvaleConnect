@@ -219,51 +219,102 @@ class PaymentService {
   }
 
   // Calculate payment breakdown with fees
-  calculatePaymentBreakdown(amount, method = 'stripe') {
-    return currencyService.calculatePaymentBreakdown(amount, 'USD');
+  calculatePaymentBreakdown(amount, method = 'stripe', currency = 'ZAR') {
+    const fees = {
+      ecocash: 0.025,
+      onemoney: 0.025,
+      stripe: 0.032,
+      bank_transfer: 0,
+      cash: 0
+    };
+
+    const feeRate = fees[method] || 0.032;
+    const fee = Math.round(amount * feeRate * 100) / 100;
+    const total = Math.round((amount + fee) * 100) / 100;
+
+    return {
+      subtotal: amount,
+      fee: fee,
+      total: total,
+      currency: currency,
+      method: method
+    };
   }
 
-  // Create PayNow payment (Zimbabwe payment gateway)
-  async createPayNowPayment(paymentData) {
+  // Create EcoCash payment (Zimbabwe mobile money)
+  async createEcoCashPayment(paymentData) {
     try {
       const {
         amount,
-        currency = 'USD',
+        currency = 'ZAR',
         reference,
-        email,
+        phone,
         description,
-        planName,
-        billingCycle,
-        userId
+        bookingId
       } = paymentData;
 
-      // PayNow integration for Zimbabwe
-      const payNowData = {
+      // EcoCash integration for South Africa
+      const ecoCashData = {
         id: reference,
         amount: amount,
+        phone: phone,
         additionalInfo: description,
         returnUrl: `${process.env.FRONTEND_URL}/payment/success`,
-        resultUrl: `${process.env.BACKEND_URL}/api/payments/paynow/callback`,
-        authemail: email,
-        status: 'Message',
+        resultUrl: `${process.env.BACKEND_URL}/api/payments/ecocash/callback`,
         reference: reference
       };
-
-      // Generate PayNow redirect URL
-      const redirectUrl = `https://www.paynow.co.zw/payment/checkout/${reference}`;
 
       return {
         success: true,
         reference: reference,
         amount: amount,
         currency: currency,
-        redirectUrl: redirectUrl,
-        paymentMethod: 'paynow',
+        paymentMethod: 'ecocash',
         status: 'pending',
-        payNowData: payNowData
+        instructions: {
+          message: `Dial *151# and follow prompts to pay R${amount} to merchant code 123456`,
+          merchantCode: '123456',
+          amount: `R${amount}`,
+          reference: reference
+        }
       };
     } catch (error) {
-      console.error('PayNow payment creation failed:', error);
+      console.error('EcoCash payment creation failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Create OneMoney payment (South African mobile money)
+  async createOneMoneyPayment(paymentData) {
+    try {
+      const {
+        amount,
+        currency = 'ZAR',
+        reference,
+        phone,
+        description,
+        bookingId
+      } = paymentData;
+
+      return {
+        success: true,
+        reference: reference,
+        amount: amount,
+        currency: currency,
+        paymentMethod: 'onemoney',
+        status: 'pending',
+        instructions: {
+          message: `Send R${amount} to OneMoney merchant 654321 with reference ${reference}`,
+          merchantCode: '654321',
+          amount: `R${amount}`,
+          reference: reference
+        }
+      };
+    } catch (error) {
+      console.error('OneMoney payment creation failed:', error);
       return {
         success: false,
         error: error.message
@@ -296,33 +347,55 @@ class PaymentService {
   getAvailablePaymentMethods() {
     return [
       {
-        id: 'paynow',
-        name: 'PayNow',
-        description: 'EcoCash, OneMoney, Visa & Mastercard',
-        fee: '3.5%',
+        id: 'ecocash',
+        name: 'EcoCash',
+        description: 'Mobile money payment via EcoCash',
+        fee: '2.5%',
         processingTime: 'Instant',
-        icon: 'payment',
-        supported: ['ZWL', 'USD'],
-        local: true
+        icon: 'phone_android',
+        supported: ['ZAR'],
+        local: true,
+        popular: true
+      },
+      {
+        id: 'onemoney',
+        name: 'OneMoney',
+        description: 'Mobile money payment via OneMoney',
+        fee: '2.5%',
+        processingTime: 'Instant',
+        icon: 'phone_android',
+        supported: ['ZAR'],
+        local: true,
+        popular: true
       },
       {
         id: 'stripe',
         name: 'Credit/Debit Card',
-        description: 'International Visa, Mastercard, American Express',
-        fee: '2.9%',
+        description: 'Visa, Mastercard, American Express',
+        fee: '3.2%',
         processingTime: 'Instant',
         icon: 'credit_card',
-        supported: ['USD'],
+        supported: ['ZAR', 'USD'],
         local: false
       },
       {
         id: 'bank_transfer',
         name: 'Bank Transfer',
-        description: 'Direct bank transfer (manual verification)',
+        description: 'Direct bank transfer (EFT)',
         fee: 'Free',
-        processingTime: '1-3 business days',
+        processingTime: '1-2 business days',
         icon: 'account_balance',
-        supported: ['USD', 'ZWL'],
+        supported: ['ZAR'],
+        local: true
+      },
+      {
+        id: 'cash',
+        name: 'Cash on Service',
+        description: 'Pay cash when service is delivered',
+        fee: 'Free',
+        processingTime: 'On delivery',
+        icon: 'money',
+        supported: ['ZAR'],
         local: true
       }
     ];
