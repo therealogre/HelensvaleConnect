@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: helensvale-connect
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: MONGODB_URI
+        fromDatabase:
+          name: helensvale-mongodb
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: helensvale-redis
+          property: connectionString
+      - key: PAYNOW_INTEGRATION_ID
+        value: 21545
+      - key: PAYNOW_INTEGRATION_KEY
+        value: f073cc69-4438-418f-8b30-62779a5a2cb0
+      - key: PAYNOW_RESULT_URL
+        value: https://helensvaleconnect.art/api/payments/paynow/result
+      - key: PAYNOW_RETURN_URL
+        value: https://helensvaleconnect.art/payment/success
+      - key: FRONTEND_URL
+        value: https://helensvaleconnect.art
+      - key: BACKEND_URL
+        value: https://helensvaleconnect.art
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
+      - key: COMPANY_NAME
+        value: PowerHouse Ventures
+      - key: COMPANY_EMAIL
+        value: info@helensvaleconnect.art
+
+databases:
+  - name: helensvale-mongodb
+    databaseName: helensvale_connect
+    user: admin
+
+  - name: helensvale-redis
+    plan: free
