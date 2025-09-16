@@ -17,7 +17,6 @@ import ServiceManagement from './pages/vendor/ServiceManagement';
 import BookingCalendar from './pages/booking/BookingCalendar';
 import MyBookings from './pages/booking/MyBookings';
 import CustomerDashboard from './pages/CustomerDashboard';
-import MarketplaceJourneyTest from './components/testing/MarketplaceJourneyTest';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import './App.css';
 
@@ -49,8 +48,6 @@ function App() {
             <Route path="/vendors" element={<VendorMarketplace />} />
             <Route path="/vendor/:id" element={<VendorProfile />} />
             
-            {/* Testing route (development only) */}
-            <Route path="/test-journey" element={<MarketplaceJourneyTest />} />
             
             {/* Legal and support pages */}
             <Route path="/terms" element={<div className="legal-page"><h1>Terms of Service</h1><p>Terms content coming soon...</p></div>} />
