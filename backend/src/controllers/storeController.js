@@ -367,6 +367,110 @@ class StoreController {
         }
     }
 
+    // Get user's store data for dashboard
+    async getMyStore(req, res) {
+        try {
+            const userId = req.user.id;
+            
+            // Find store owned by the current user
+            const store = await Store.findOne({ 
+                $or: [
+                    { ownerId: userId },
+                    { 'team.userId': userId }
+                ]
+            });
+
+            if (!store) {
+                return res.json({
+                    success: true,
+                    data: {
+                        hasStore: false,
+                        message: 'No store found. Create your first store to get started.'
+                    }
+                });
+            }
+
+            // Calculate store metrics
+            const metrics = {
+                totalViews: store.metrics.totalViews || 0,
+                totalBookings: store.metrics.totalBookings || 0,
+                totalRevenue: store.metrics.totalRevenue || 0,
+                averageRating: store.metrics.averageRating || 0,
+                activeServices: store.services?.length || 0,
+                completionRate: this.calculateStoreCompletion(store)
+            };
+
+            res.json({
+                success: true,
+                data: {
+                    hasStore: true,
+                    store: {
+                        id: store._id,
+                        storeName: store.storeName,
+                        storeSlug: store.storeSlug,
+                        description: store.description,
+                        businessType: store.businessType,
+                        category: store.category,
+                        status: store.status,
+                        isLaunched: store.isLaunched,
+                        logo: store.logo,
+                        coverImage: store.coverImage,
+                        services: store.services,
+                        operatingHours: store.operatingHours,
+                        address: store.address,
+                        paymentMethods: store.paymentMethods,
+                        socialMedia: store.socialMedia,
+                        createdAt: store.createdAt,
+                        launchedAt: store.launchedAt
+                    },
+                    metrics
+                }
+            });
+
+        } catch (error) {
+            console.error('Get my store error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to get store data'
+            });
+        }
+    }
+
+    // Calculate store profile completion percentage
+    calculateStoreCompletion(store) {
+        const requiredFields = [
+            'storeName', 'description', 'businessType', 'category',
+            'address.street', 'address.city', 'operatingHours'
+        ];
+        
+        const optionalFields = [
+            'logo.url', 'coverImage.url', 'services', 'socialMedia.facebook',
+            'paymentMethods.ecocash', 'tagline'
+        ];
+
+        let completed = 0;
+        let total = requiredFields.length + optionalFields.length;
+
+        // Check required fields
+        requiredFields.forEach(field => {
+            if (this.getNestedValue(store, field)) completed++;
+        });
+
+        // Check optional fields
+        optionalFields.forEach(field => {
+            if (this.getNestedValue(store, field)) completed++;
+        });
+
+        return Math.round((completed / total) * 100);
+    }
+
+    // Helper to get nested object values
+    getNestedValue(obj, path) {
+        return path.split('.').reduce((current, key) => {
+            return current && current[key] !== undefined ? current[key] : null;
+        }, obj);
+    }
+
     // Helper methods
     getBusinessTypeTemplate(businessType) {
         const templates = {

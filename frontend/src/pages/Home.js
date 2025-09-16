@@ -1,624 +1,698 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Button, 
-  Grid, 
-  Card, 
-  CardContent, 
-  TextField, 
+import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  TextField,
   InputAdornment,
   Chip,
   Avatar,
   Rating,
-  IconButton,
-  Badge,
   Divider,
-  Stack
+  Paper,
+  IconButton,
+  Fade,
+  Slide,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Search as SearchIcon,
   LocationOn as LocationIcon,
   Star as StarIcon,
-  Verified as VerifiedIcon,
-  TrendingUp as TrendingIcon,
+  TrendingUp as TrendingUpIcon,
   Security as SecurityIcon,
-  Speed as SpeedIcon,
-  Phone as PhoneIcon,
-  Chat as ChatIcon,
-  WhatsApp as WhatsAppIcon,
   Payment as PaymentIcon,
-  LocalOffer as OfferIcon,
-  AccessTime as TimeIcon,
-  CheckCircle as CheckIcon
+  Phone as PhoneIcon,
+  CheckCircle as CheckCircleIcon,
+  ArrowForward as ArrowForwardIcon,
+  Business as BusinessIcon,
+  People as PeopleIcon,
+  Schedule as ScheduleIcon,
+  MonetizationOn as MoneyIcon
 } from '@mui/icons-material';
-import './Home.css';
 
 const Home = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('Helensvale, Borrowdale, Harare');
-  const [featuredServices, setFeaturedServices] = useState([]);
-  const [stats, setStats] = useState({
-    totalVendors: 2850,
-    totalBookings: 47200,
-    averageRating: 4.9,
-    activeUsers: 18500,
-    savedAmount: '$240K USD',
-    responseTime: '< 15min'
-  });
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [searchTerm, setSearchTerm] = useState('');
+  const [location, setLocation] = useState('');
+  const [heroVisible, setHeroVisible] = useState(false);
+  const [statsVisible, setStatsVisible] = useState(false);
 
   useEffect(() => {
-    // Simulate fetching featured services
-    setFeaturedServices([
-      { id: 1, name: 'Hair & Beauty', icon: '💇‍♀️', count: 485, trending: true, avgPrice: '$8-25 USD', description: 'Salons, barbershops, nail care' },
-      { id: 2, name: 'Home Services', icon: '🏠', count: 389, trending: false, avgPrice: '$15-45 USD', description: 'Plumbing, electrical, cleaning' },
-      { id: 3, name: 'Health & Wellness', icon: '🏥', count: 256, trending: true, avgPrice: '$18-35 USD', description: 'Massage, therapy, fitness' },
-      { id: 4, name: 'Automotive', icon: '🚗', count: 234, trending: false, avgPrice: '$25-85 USD', description: 'Car wash, repairs, maintenance' },
-      { id: 5, name: 'Food & Catering', icon: '🍽️', count: 398, trending: true, avgPrice: '$5-18 USD', description: 'Catering, chefs, food delivery' },
-      { id: 6, name: 'Business Services', icon: '💼', count: 187, trending: true, avgPrice: '$25-75 USD', description: 'Accounting, legal, consulting' }
-    ]);
+    setHeroVisible(true);
+    const timer = setTimeout(() => setStatsVisible(true), 500);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSearch = () => {
-    // Navigate to search results
-    console.log('Searching for:', searchQuery, 'in', location);
+    const params = new URLSearchParams();
+    if (searchTerm) params.append('search', searchTerm);
+    if (location) params.append('location', location);
+    navigate(`/vendors?${params.toString()}`);
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // Featured categories with African market focus
+  const featuredCategories = [
+    { name: 'Beauty & Wellness', icon: '💄', count: '2,400+', color: '#FF6B9D' },
+    { name: 'Home Services', icon: '🏠', count: '1,800+', color: '#4ECDC4' },
+    { name: 'Automotive', icon: '🚗', count: '950+', color: '#45B7D1' },
+    { name: 'Food & Catering', icon: '🍽️', count: '1,200+', color: '#FFA726' },
+    { name: 'Health & Fitness', icon: '💪', count: '680+', color: '#66BB6A' },
+    { name: 'Education', icon: '📚', count: '540+', color: '#AB47BC' },
+    { name: 'Technology', icon: '💻', count: '420+', color: '#42A5F5' },
+    { name: 'Events', icon: '🎉', count: '890+', color: '#EF5350' }
+  ];
+
+  // Success stories with African context
+  const successStories = [
+    {
+      name: 'Tendai Mukamuri',
+      business: 'Mukamuri Beauty Salon',
+      location: 'Harare',
+      image: '/images/vendor-placeholder.jpg',
+      rating: 4.9,
+      reviews: 234,
+      story: 'Increased bookings by 300% in 3 months',
+      revenue: '$2,400/month'
+    },
+    {
+      name: 'Grace Chivasa',
+      business: 'Grace\'s Catering',
+      location: 'Bulawayo',
+      image: '/images/vendor-placeholder.jpg',
+      rating: 4.8,
+      reviews: 187,
+      story: 'Expanded to 5 new areas with online presence',
+      revenue: '$1,800/month'
+    },
+    {
+      name: 'Michael Sibanda',
+      business: 'AutoFix Garage',
+      location: 'Gweru',
+      image: '/images/vendor-placeholder.jpg',
+      rating: 4.9,
+      reviews: 156,
+      story: 'Built trust with 200+ repeat customers',
+      revenue: '$3,200/month'
+    }
+  ];
+
+  // Platform benefits with psychological triggers
+  const platformBenefits = [
+    {
+      icon: <SecurityIcon sx={{ fontSize: 40, color: '#4CAF50' }} />,
+      title: 'Secure Payments',
+      description: 'EcoCash, OneMoney & PayNow integration with bank-level security',
+      highlight: 'Zimbabwe\'s most trusted'
+    },
+    {
+      icon: <PhoneIcon sx={{ fontSize: 40, color: '#2196F3' }} />,
+      title: 'Mobile-First Design',
+      description: 'Optimized for African mobile networks and data-conscious users',
+      highlight: 'Works on any device'
+    },
+    {
+      icon: <PeopleIcon sx={{ fontSize: 40, color: '#FF9800' }} />,
+      title: 'Local Community',
+      description: 'Connect with verified local service providers in your area',
+      highlight: '15,000+ active users'
+    },
+    {
+      icon: <MoneyIcon sx={{ fontSize: 40, color: '#9C27B0' }} />,
+      title: 'Fair Pricing',
+      description: 'Transparent pricing with no hidden fees. Pay what you see.',
+      highlight: 'Save up to 40%'
+    }
+  ];
+
   return (
-    <Box className="homepage-container">
-      {/* Hero Section with Smart Search */}
-      <Box className="hero-section">
-        <Container maxWidth="lg">
-          <Box className="hero-content">
-            {/* Trust Badges */}
-            <Stack direction="row" spacing={2} justifyContent="center" className="trust-badges">
-              <Chip 
-                icon={<VerifiedIcon />}
-                label={`${stats.totalVendors.toLocaleString()}+ Verified Businesses`}
-                className="trust-badge primary"
-                color="primary"
-                variant="filled"
-              />
-              <Chip 
-                icon={<CheckIcon />}
-                label="100% Satisfaction Guaranteed"
-                className="trust-badge success"
-                color="success"
-                variant="filled"
-              />
-            </Stack>
-            
-            {/* Main Headline - Optimized for African Market */}
-            <Typography variant="h1" className="hero-title">
-              Transform Your Business with
-              <Box component="span" className="gradient-text"> Digital Marketplace</Box>
-            </Typography>
-            
-            <Typography variant="h5" className="hero-subtitle">
-              Join 18,500+ Zimbabweans connecting with trusted local professionals in Helensvale, Borrowdale and across Harare. 
-              <Box component="span" className="highlight-text">Book instantly, pay with EcoCash USD, save up to 40%</Box>
-            </Typography>
-            
-            {/* Social Proof Bar */}
-            <Box className="social-proof-bar">
-              <Stack direction="row" spacing={3} justifyContent="center" alignItems="center">
-                <Box className="proof-item">
-                  <Typography variant="h6" color="primary">{stats.savedAmount}</Typography>
-                  <Typography variant="caption">Saved by customers</Typography>
-                </Box>
-                <Divider orientation="vertical" flexItem />
-                <Box className="proof-item">
-                  <Typography variant="h6" color="primary">{stats.responseTime}</Typography>
-                  <Typography variant="caption">Avg response time</Typography>
-                </Box>
-                <Divider orientation="vertical" flexItem />
-                <Box className="proof-item">
-                  <Typography variant="h6" color="primary">{stats.averageRating}★</Typography>
-                  <Typography variant="caption">Customer rating</Typography>
-                </Box>
-              </Stack>
-            </Box>
-
-            {/* Smart Search Bar */}
-            <Box className="search-container">
-              <Box className="search-bar">
-                <TextField
-                  fullWidth
-                  placeholder="What service do you need? (e.g., haircut, plumber, massage)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  className="search-input"
-                />
-                <TextField
-                  placeholder="Location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  className="location-input"
-                />
-                <Button 
-                  variant="contained" 
-                  size="large" 
-                  onClick={handleSearch}
-                  className="search-button"
-                >
-                  Search
-                </Button>
-              </Box>
-            </Box>
-
-            {/* Popular Searches - African Context */}
-            <Box className="popular-searches">
-              <Typography variant="body2" color="text.secondary">
-                Trending in Helensvale & Borrowdale: 
-              </Typography>
-              {['Hair Braiding', 'Domestic Worker', 'Kombi Services', 'Mobile Mechanic', 'Catering', 'Security Services'].map((term) => (
-                <Chip 
-                  key={term} 
-                  label={term} 
-                  size="small" 
-                  onClick={() => setSearchQuery(term)}
-                  className="popular-chip"
-                  variant="outlined"
-                />
-              ))}
-            </Box>
-            
-            {/* Urgency Banner */}
-            <Box className="urgency-banner">
-              <Chip 
-                icon={<OfferIcon />}
-                label="LIMITED TIME: First booking 20% OFF - Ends in 48 hours!"
-                color="error"
-                variant="filled"
-                className="urgency-chip"
-              />
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Service Categories */}
-      <Container maxWidth="lg" className="categories-section">
-        <Typography variant="h3" align="center" className="section-title">
-          Browse by Category
-        </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" className="section-subtitle">
-          Discover trusted professionals across all service categories
-        </Typography>
+    <Box>
+      {/* Hero Section with Psychological Optimization */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          py: { xs: 8, md: 12 },
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Background Pattern */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            opacity: 0.3
+          }}
+        />
         
-        <Grid container spacing={3} className="categories-grid">
-          {featuredServices.map((service) => (
-            <Grid item xs={12} sm={6} md={4} key={service.id}>
-              <Card className="category-card" elevation={2}>
-                <CardContent className="category-content">
-                  <Box className="category-header">
-                    <Typography variant="h2" className="category-icon">
-                      {service.icon}
-                    </Typography>
-                    {service.trending && (
-                      <Chip 
-                        icon={<TrendingIcon />} 
-                        label="Trending" 
-                        size="small" 
-                        color="secondary"
-                        className="trending-badge"
-                      />
-                    )}
-                  </Box>
-                  <Typography variant="h6" className="category-name">
-                    {service.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" className="category-description">
-                    {service.description}
-                  </Typography>
-                  <Box className="category-stats">
-                    <Typography variant="body2" color="primary" fontWeight="bold">
-                      {service.count} providers • {service.avgPrice}
-                    </Typography>
-                  </Box>
-                  <Button 
-                    variant="contained" 
-                    size="small" 
-                    className="category-button"
-                    onClick={() => setSearchQuery(service.name)}
-                    fullWidth
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+          <Fade in={heroVisible} timeout={1000}>
+            <Grid container spacing={4} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                  {/* Trust Badge */}
+                  <Chip
+                    label="🇿🇼 Zimbabwe's #1 Marketplace"
+                    sx={{
+                      mb: 3,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                  
+                  <Typography
+                    variant="h2"
+                    component="h1"
+                    sx={{
+                      fontWeight: 'bold',
+                      mb: 2,
+                      fontSize: { xs: '2.5rem', md: '3.5rem' },
+                      lineHeight: 1.2
+                    }}
                   >
-                    Book Now
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+                    Find Local Services
+                    <Box component="span" sx={{ color: '#FFD700', display: 'block' }}>
+                      You Can Trust
+                    </Box>
+                  </Typography>
+                  
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 4,
+                      opacity: 0.9,
+                      fontSize: { xs: '1.1rem', md: '1.3rem' },
+                      maxWidth: '500px',
+                      mx: { xs: 'auto', md: 0 }
+                    }}
+                  >
+                    Connect with verified local professionals. Book instantly. Pay securely with EcoCash, OneMoney, or PayNow.
+                  </Typography>
 
-      {/* Trust & Safety Section */}
-      <Box className="trust-section">
-        <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h3" className="section-title">
-                Your Safety is Our Priority
-              </Typography>
-              <Typography variant="h6" color="text.secondary" className="section-subtitle">
-                Every professional on our platform is verified, insured, and committed to excellence.
-              </Typography>
+                  {/* Social Proof */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, justifyContent: { xs: 'center', md: 'flex-start' } }}>
+                    <Box sx={{ display: 'flex', mr: 2 }}>
+                      {[1,2,3,4,5].map((star) => (
+                        <StarIcon key={star} sx={{ color: '#FFD700', fontSize: '1.5rem' }} />
+                      ))}
+                    </Box>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      4.9/5 from 12,000+ reviews
+                    </Typography>
+                  </Box>
+
+                  {/* CTA Buttons */}
+                  <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' } }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={() => navigate('/vendors')}
+                      sx={{
+                        bgcolor: '#FFD700',
+                        color: '#000',
+                        fontWeight: 'bold',
+                        py: 2,
+                        px: 4,
+                        fontSize: '1.1rem',
+                        '&:hover': { bgcolor: '#FFC107', transform: 'translateY(-2px)' },
+                        transition: 'all 0.3s ease'
+                      }}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Find Services Now
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      onClick={() => navigate('/vendor-onboarding')}
+                      sx={{
+                        borderColor: 'white',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        py: 2,
+                        px: 4,
+                        '&:hover': { 
+                          borderColor: '#FFD700',
+                          bgcolor: 'rgba(255,215,0,0.1)',
+                          transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      Start Selling
+                    </Button>
+                  </Box>
+                </Box>
+              </Grid>
               
-              <Box className="trust-features">
-                <Box className="trust-feature">
-                  <VerifiedIcon color="primary" className="trust-icon" />
-                  <Box>
-                    <Typography variant="h6">Verified Professionals</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Background checks, license verification, and insurance validation
-                    </Typography>
+              <Grid item xs={12} md={6}>
+                {/* Search Widget */}
+                <Paper
+                  elevation={8}
+                  sx={{
+                    p: 3,
+                    borderRadius: 3,
+                    bgcolor: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 2, color: '#333', fontWeight: 'bold' }}>
+                    What service do you need?
+                  </Typography>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      placeholder="e.g. Hair salon, plumber, car repair..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          bgcolor: 'white'
+                        }
+                      }}
+                    />
                   </Box>
-                </Box>
-                <Box className="trust-feature">
-                  <SecurityIcon color="primary" className="trust-icon" />
-                  <Box>
-                    <Typography variant="h6">Secure USD Payments</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      EcoCash USD, NetOne OneMoney, and international card payments with buyer protection
-                    </Typography>
+                  
+                  <Box sx={{ mb: 3 }}>
+                    <TextField
+                      fullWidth
+                      placeholder="Enter your location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocationIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          bgcolor: 'white'
+                        }
+                      }}
+                    />
                   </Box>
-                </Box>
-                <Box className="trust-feature">
-                  <StarIcon color="primary" className="trust-icon" />
-                  <Box>
-                    <Typography variant="h6">Quality Guarantee</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Satisfaction guaranteed or your money back
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
+                  
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    onClick={handleSearch}
+                    sx={{
+                      bgcolor: '#667eea',
+                      py: 1.5,
+                      borderRadius: 2,
+                      fontWeight: 'bold',
+                      fontSize: '1.1rem',
+                      '&:hover': { bgcolor: '#5a67d8', transform: 'translateY(-1px)' },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Search Services
+                  </Button>
+                </Paper>
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Box className="stats-container">
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Card className="stat-card">
-                      <CardContent>
-                        <Typography variant="h4" color="primary">
-                          {stats.averageRating}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Average Rating
-                        </Typography>
-                        <Rating value={stats.averageRating} readOnly size="small" />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Card className="stat-card">
-                      <CardContent>
-                        <Typography variant="h4" color="primary">
-                          {(stats.totalBookings / 1000).toFixed(1)}K+
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Bookings Completed
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Card className="stat-card">
-                      <CardContent>
-                        <Typography variant="h4" color="primary">
-                          {(stats.totalVendors / 1000).toFixed(1)}K+
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Verified Providers
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Card className="stat-card">
-                      <CardContent>
-                        <Typography variant="h4" color="primary">
-                          {(stats.activeUsers / 1000).toFixed(1)}K+
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Happy Customers
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+          </Fade>
         </Container>
       </Box>
 
-      {/* Featured Providers */}
-      <Container maxWidth="lg" className="featured-section">
-        <Typography variant="h3" align="center" className="section-title">
-          Top-Rated Professionals
+      {/* Trust Statistics */}
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Slide in={statsVisible} direction="up" timeout={800}>
+          <Paper
+            elevation={4}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              bgcolor: '#f8f9fa',
+              mt: -6,
+              position: 'relative',
+              zIndex: 3
+            }}
+          >
+            <Grid container spacing={4} textAlign="center">
+              <Grid item xs={6} md={3}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#667eea', mb: 1 }}>
+                  15,000+
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Active Users
+                </Typography>
+              </Grid>
+              <Grid item xs={6} md={3}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#667eea', mb: 1 }}>
+                  3,200+
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Service Providers
+                </Typography>
+              </Grid>
+              <Grid item xs={6} md={3}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#667eea', mb: 1 }}>
+                  45,000+
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Bookings Completed
+                </Typography>
+              </Grid>
+              <Grid item xs={6} md={3}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#667eea', mb: 1 }}>
+                  4.9★
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Average Rating
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Slide>
+      </Container>
+
+      {/* Featured Categories */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          textAlign="center"
+          sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}
+        >
+          Popular Services
         </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" className="section-subtitle">
-          Discover highly-rated professionals in your area
+        <Typography
+          variant="h6"
+          textAlign="center"
+          color="text.secondary"
+          sx={{ mb: 6, maxWidth: '600px', mx: 'auto' }}
+        >
+          Discover the most in-demand services in your area
         </Typography>
-        
-        <Grid container spacing={3} className="providers-grid">
-          {[
-            {
-              id: 1,
-              name: "Sarah's Hair Studio",
-              category: "Hair & Beauty",
-              rating: 4.9,
-              reviews: 127,
-              image: "/images/provider-1.jpg",
-              verified: true,
-              responseTime: "< 1 hour",
-              location: "Helensvale, Borrowdale",
-              price: "From $8 USD"
-            },
-            {
-              id: 2,
-              name: "Elite Home Services",
-              category: "Home Maintenance",
-              rating: 4.8,
-              reviews: 89,
-              image: "/images/provider-2.jpg",
-              verified: true,
-              responseTime: "< 2 hours",
-              location: "Borrowdale, Harare",
-              price: "From $15 USD"
-            },
-            {
-              id: 3,
-              name: "Wellness Massage Therapy",
-              category: "Health & Wellness",
-              rating: 5.0,
-              reviews: 156,
-              image: "/images/provider-3.jpg",
-              verified: true,
-              responseTime: "< 30 mins",
-              location: "Helensvale Shopping Centre",
-              price: "From $18 USD"
-            }
-          ].map((provider) => (
-            <Grid item xs={12} sm={6} md={4} key={provider.id}>
-              <Card className="provider-card" elevation={3}>
-                <Box className="provider-image">
-                  <img src={provider.image} alt={provider.name} />
-                  {provider.verified && (
-                    <Chip 
-                      icon={<VerifiedIcon />} 
-                      label="Verified" 
-                      size="small" 
-                      color="primary"
-                      className="verified-badge"
-                    />
-                  )}
-                </Box>
-                <CardContent>
-                  <Typography variant="h6" className="provider-name">
-                    {provider.name}
+
+        <Grid container spacing={3}>
+          {featuredCategories.map((category, index) => (
+            <Grid item xs={6} md={3} key={category.name}>
+              <Card
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: 8
+                  },
+                  borderRadius: 3,
+                  overflow: 'visible',
+                  position: 'relative'
+                }}
+                onClick={() => navigate(`/vendors?category=${encodeURIComponent(category.name)}`)}
+              >
+                <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                  <Typography
+                    variant="h2"
+                    sx={{ mb: 2, fontSize: '3rem' }}
+                  >
+                    {category.icon}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: 'bold', mb: 1, color: category.color }}
+                  >
+                    {category.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {provider.category} • {provider.location}
+                    {category.count} providers
                   </Typography>
-                  
-                  <Box className="provider-rating">
-                    <Rating value={provider.rating} readOnly size="small" />
-                    <Typography variant="body2" color="text.secondary">
-                      {provider.rating} ({provider.reviews} reviews)
-                    </Typography>
-                  </Box>
-                  
-                  <Box className="provider-details">
-                    <Chip 
-                      icon={<SpeedIcon />} 
-                      label={provider.responseTime} 
-                      size="small" 
-                      variant="outlined"
-                    />
-                    <Typography variant="body2" className="provider-price">
-                      {provider.price}
-                    </Typography>
-                  </Box>
-                  
-                  <Box className="provider-actions">
-                    <Button variant="outlined" size="small" startIcon={<ChatIcon />}>
-                      Message
-                    </Button>
-                    <Button variant="contained" size="small">
-                      Book Now
-                    </Button>
-                  </Box>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
-        
-        <Box textAlign="center" className="view-all-section">
-          <Button variant="outlined" size="large">
-            View All Providers
-          </Button>
-        </Box>
       </Container>
 
-      {/* How It Works */}
-      <Box className="how-it-works-section">
+      {/* Platform Benefits */}
+      <Box sx={{ bgcolor: '#f8f9fa', py: 8 }}>
         <Container maxWidth="lg">
-          <Typography variant="h3" align="center" className="section-title">
-            How It Works
+          <Typography
+            variant="h3"
+            component="h2"
+            textAlign="center"
+            sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}
+          >
+            Why Choose Helensvale Connect?
           </Typography>
-          <Typography variant="h6" align="center" color="text.secondary" className="section-subtitle">
-            Book trusted local services in just a few clicks
+          <Typography
+            variant="h6"
+            textAlign="center"
+            color="text.secondary"
+            sx={{ mb: 6, maxWidth: '600px', mx: 'auto' }}
+          >
+            Built specifically for the African market with local payment methods and mobile-first design
           </Typography>
-          
-          <Grid container spacing={4} className="steps-grid">
-            {[
-              {
-                step: 1,
-                title: "Search & Compare",
-                description: "Find local professionals, compare prices, and read reviews from real customers",
-                icon: "🔍"
-              },
-              {
-                step: 2,
-                title: "Book Instantly",
-                description: "Choose your preferred time slot and book instantly with our secure booking system",
-                icon: "📅"
-              },
-              {
-                step: 3,
-                title: "Pay Securely",
-                description: "Pay with EcoCash USD, NetOne OneMoney, or international card. Your payment is protected until service completion",
-                icon: "💳"
-              },
-              {
-                step: 4,
-                title: "Enjoy Service",
-                description: "Relax and enjoy professional service. Rate your experience to help others",
-                icon: "⭐"
-              }
-            ].map((step) => (
-              <Grid item xs={12} sm={6} md={3} key={step.step}>
-                <Box className="step-card">
-                  <Box className="step-number">{step.step}</Box>
-                  <Typography variant="h2" className="step-icon">
-                    {step.icon}
-                  </Typography>
-                  <Typography variant="h6" className="step-title">
-                    {step.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {step.description}
-                  </Typography>
-                </Box>
+
+          <Grid container spacing={4}>
+            {platformBenefits.map((benefit, index) => (
+              <Grid item xs={12} md={6} key={benefit.title}>
+                <Card
+                  sx={{
+                    p: 3,
+                    height: '100%',
+                    borderRadius: 3,
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Box sx={{ flexShrink: 0 }}>
+                      {benefit.icon}
+                    </Box>
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                          {benefit.title}
+                        </Typography>
+                        <Chip
+                          label={benefit.highlight}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(102, 126, 234, 0.1)',
+                            color: '#667eea',
+                            fontWeight: 'bold'
+                          }}
+                        />
+                      </Box>
+                      <Typography variant="body1" color="text.secondary">
+                        {benefit.description}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Card>
               </Grid>
             ))}
           </Grid>
         </Container>
       </Box>
 
-      {/* Dual CTA Section */}
-      <Box className="dual-cta-section">
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            {/* For Customers */}
-            <Grid item xs={12} md={6}>
-              <Card className="cta-card customer-cta" elevation={4}>
-                <CardContent>
-                  <Typography variant="h4" className="cta-title">
-                    Need a Service?
-                  </Typography>
-                  <Typography variant="h6" color="text.secondary" className="cta-subtitle">
-                    Find trusted professionals in your area and book instantly
-                  </Typography>
-                  <Box className="cta-features">
-                    <Typography variant="body2">✓ Verified professionals</Typography>
-                    <Typography variant="body2">✓ Instant booking</Typography>
-                    <Typography variant="body2">✓ Secure payments</Typography>
-                    <Typography variant="body2">✓ Satisfaction guarantee</Typography>
+      {/* Success Stories */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          textAlign="center"
+          sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}
+        >
+          Success Stories
+        </Typography>
+        <Typography
+          variant="h6"
+          textAlign="center"
+          color="text.secondary"
+          sx={{ mb: 6, maxWidth: '600px', mx: 'auto' }}
+        >
+          Real businesses achieving real results with Helensvale Connect
+        </Typography>
+
+        <Grid container spacing={4}>
+          {successStories.map((story, index) => (
+            <Grid item xs={12} md={4} key={story.name}>
+              <Card
+                sx={{
+                  height: '100%',
+                  borderRadius: 3,
+                  transition: 'all 0.3s ease',
+                  '&:hover': { transform: 'translateY(-4px)', boxShadow: 8 }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar
+                      src={story.image}
+                      sx={{ width: 60, height: 60, mr: 2 }}
+                    />
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                        {story.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {story.business} • {story.location}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                        <Rating value={story.rating} readOnly size="small" />
+                        <Typography variant="body2" sx={{ ml: 1 }}>
+                          ({story.reviews} reviews)
+                        </Typography>
+                      </Box>
+                    </Box>
                   </Box>
-                  <Button 
-                    variant="contained" 
-                    size="large" 
-                    fullWidth
-                    className="cta-button"
-                    onClick={handleSearch}
+                  
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontStyle: 'italic',
+                      mb: 2,
+                      color: '#667eea',
+                      fontWeight: 'bold'
+                    }}
                   >
-                    Find Services Now
-                  </Button>
+                    "{story.story}"
+                  </Typography>
+                  
+                  <Box
+                    sx={{
+                      bgcolor: '#f0f4ff',
+                      p: 2,
+                      borderRadius: 2,
+                      textAlign: 'center'
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#667eea' }}>
+                      {story.revenue}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Average Monthly Revenue
+                    </Typography>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>
-            
-            {/* For Providers */}
-            <Grid item xs={12} md={6}>
-              <Card className="cta-card provider-cta" elevation={4}>
-                <CardContent>
-                  <Typography variant="h4" className="cta-title">
-                    Grow Your Business
-                  </Typography>
-                  <Typography variant="h6" color="text.secondary" className="cta-subtitle">
-                    Join hundreds of professionals in Helensvale, Borrowdale earning USD with Helensvale Connect
-                  </Typography>
-                  <Box className="cta-features">
-                    <Typography variant="body2">✓ More customers</Typography>
-                    <Typography variant="body2">✓ Easy booking management</Typography>
-                    <Typography variant="body2">✓ EcoCash USD integration</Typography>
-                    <Typography variant="body2">✓ Marketing tools included</Typography>
-                  </Box>
-                  <Button 
-                    variant="contained" 
-                    size="large" 
-                    fullWidth
-                    component={Link}
-                    to="/vendor-onboarding"
-                    className="cta-button provider-button"
-                  >
-                    Start Earning Today
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Final CTA Section */}
+      <Box
+        sx={{
+          bgcolor: '#667eea',
+          color: 'white',
+          py: 8,
+          textAlign: 'center'
+        }}
+      >
+        <Container maxWidth="md">
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{ fontWeight: 'bold', mb: 2 }}
+          >
+            Ready to Get Started?
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ mb: 4, opacity: 0.9 }}
+          >
+            Join thousands of satisfied customers and service providers
+          </Typography>
+          
+          <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' } }}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => navigate('/vendors')}
+              sx={{
+                bgcolor: '#FFD700',
+                color: '#000',
+                fontWeight: 'bold',
+                py: 2,
+                px: 4,
+                fontSize: '1.1rem',
+                '&:hover': { bgcolor: '#FFC107', transform: 'translateY(-2px)' },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Book a Service
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/vendor-onboarding')}
+              sx={{
+                borderColor: 'white',
+                color: 'white',
+                fontWeight: 'bold',
+                py: 2,
+                px: 4,
+                '&:hover': {
+                  borderColor: '#FFD700',
+                  bgcolor: 'rgba(255,215,0,0.1)',
+                  transform: 'translateY(-2px)'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Become a Provider
+            </Button>
+          </Box>
+          
+          {/* Trust indicators */}
+          <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CheckCircleIcon />
+              <Typography variant="body2">Verified Providers</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <SecurityIcon />
+              <Typography variant="body2">Secure Payments</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <StarIcon />
+              <Typography variant="body2">Quality Guaranteed</Typography>
+            </Box>
+          </Box>
         </Container>
       </Box>
-
-      {/* Mobile App Download */}
-      <Container maxWidth="lg" className="app-download-section">
-        <Box className="app-download-content">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h3" className="section-title">
-                Get the Mobile App
-              </Typography>
-              <Typography variant="h6" color="text.secondary" className="section-subtitle">
-                Book services on the go with our mobile-optimized experience
-              </Typography>
-              <Box className="app-features">
-                <Typography variant="body1">📱 Works offline</Typography>
-                <Typography variant="body1">🔔 Real-time notifications</Typography>
-                <Typography variant="body1">💬 In-app messaging</Typography>
-                <Typography variant="body1">📍 GPS location services</Typography>
-              </Box>
-              <Box className="download-buttons">
-                <Button 
-                  variant="contained" 
-                  size="large"
-                  className="download-button"
-                >
-                  Install Web App
-                </Button>
-                <Typography variant="body2" color="text.secondary">
-                  Available as Progressive Web App - no app store needed!
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box className="phone-mockup">
-                <img src="/images/phone-mockup.png" alt="Mobile App" />
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Container>
     </Box>
   );
 };

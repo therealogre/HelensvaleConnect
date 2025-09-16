@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: helensvale-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-helensvale2024}
+      MONGO_INITDB_DATABASE: helensvale_connect
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - helensvale-network
+
+  # Redis for Session Storage
+  redis:
+    image: redis:7-alpine
+    container_name: helensvale-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-helensvale2024}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - helensvale-network
+
+  # Main Application (Frontend + Backend + Nginx)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: helensvale-app
+    restart: unless-stopped
+    environment:
+      # Database
+      MONGODB_URI: mongodb://admin:${MONGO_ROOT_PASSWORD:-helensvale2024}@mongodb:27017/helensvale_connect?authSource=admin
+      
+      # JWT Secrets
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-hc_jwt_access_2024_powerhouse_ventures_secure_key_zimbabwe_marketplace}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-hc_jwt_refresh_2024_powerhouse_ventures_secure_refresh_zimbabwe}
+      JWT_ACCESS_EXPIRE: 15m
+      JWT_REFRESH_EXPIRE: 7d
+      
+      # PayNow Configuration
+      PAYNOW_INTEGRATION_ID: ${PAYNOW_INTEGRATION_ID:-21545}
+      PAYNOW_INTEGRATION_KEY: ${PAYNOW_INTEGRATION_KEY:-f073cc69-4438-418f-8b30-62779a5a2cb0}
+      PAYNOW_RESULT_URL: https://helensvaleconnect.art/api/payments/paynow/result
+      PAYNOW_RETURN_URL: https://helensvaleconnect.art/payment/success
+      
+      # Application URLs
+      FRONTEND_URL: https://helensvaleconnect.art
+      BACKEND_URL: https://api.helensvaleconnect.art
+      
+      # Security
+      COOKIE_DOMAIN: helensvaleconnect.art
+      COOKIE_SECURE: true
+      SESSION_SECRET: ${SESSION_SECRET:-hc_session_2024_powerhouse_ventures_zimbabwe_marketplace_secure}
+      BCRYPT_SALT_ROUNDS: 12
+      
+      # Email Configuration
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-noreply@helensvaleconnect.art}
+      SMTP_PASS: ${SMTP_PASS}
+      FROM_EMAIL: noreply@helensvaleconnect.art
+      FROM_NAME: Helensvale Connect
+      
+      # Cloud Storage
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-helensvale-connect}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      
+      # Payment Processing
+      PLATFORM_FEE_PERCENTAGE: 10
+      VENDOR_PAYOUT_PERCENTAGE: 90
+      
+      # Environment
+      NODE_ENV: production
+      PORT: 3001
+      
+      # Rate Limiting
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      
+      # Redis
+      REDIS_URL: redis://:${REDIS_PASSWORD:-helensvale2024}@redis:6379
+      
+      # Company Information
+      COMPANY_NAME: PowerHouse Ventures
+      COMPANY_EMAIL: info@helensvaleconnect.art
+      SUPPORT_EMAIL: support@helensvaleconnect.art
+      ADMIN_EMAIL: admin@helensvaleconnect.art
+      
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - uploads_data:/app/backend/uploads
+      - ./logs:/var/log/supervisor
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - helensvale-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  helensvale-network:
+    driver: bridge
