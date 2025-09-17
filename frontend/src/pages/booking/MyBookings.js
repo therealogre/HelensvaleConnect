@@ -29,7 +29,7 @@ import {
   Paper
 } from '@mui/material';
 import {
-  Calendar,
+  CalendarToday,
   AccessTime,
   Person,
   LocationOn,
@@ -217,7 +217,7 @@ const MyBookings = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Calendar />
+        <CalendarToday />
         My Bookings
       </Typography>
 
@@ -270,7 +270,7 @@ const MyBookings = () => {
                   </Typography>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Calendar fontSize="small" />
+                    <CalendarToday fontSize="small" />
                     <Typography variant="body2">
                       {format(parseISO(booking.bookingDate), 'EEEE, MMMM d, yyyy')}
                     </Typography>

@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
+export { AuthContext };
+
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),

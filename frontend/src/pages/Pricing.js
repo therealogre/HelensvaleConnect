@@ -36,7 +36,7 @@ import {
   Business,
   Rocket,
   Diamond,
-  Crown,
+  WorkspacePremium,
   Flash,
   Shield,
   Headset,
@@ -165,7 +165,7 @@ const Pricing = () => {
       discount: isYearly ? '50% OFF' : '33% OFF',
       popular: false,
       color: 'secondary',
-      icon: <Crown />,
+      icon: <WorkspacePremium />,
       badge: '👑 Premium',
       features: [
         { text: 'Everything in Professional', icon: <CheckCircle /> },

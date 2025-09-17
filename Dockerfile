@@ -4,7 +4,7 @@ FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci --only=production
+RUN npm install --production=false
 
 COPY frontend/ ./
 ENV REACT_APP_API_URL=https://api.helensvaleconnect.art
@@ -15,7 +15,7 @@ FROM node:18-alpine AS backend-build
 
 WORKDIR /app/backend
 COPY backend/package*.json ./
-RUN npm ci --only=production
+RUN npm install --production=true
 
 COPY backend/ ./
 

@@ -26,7 +26,7 @@ import {
   ListItemAvatar
 } from '@mui/material';
 import {
-  Calendar,
+  CalendarToday,
   AccessTime,
   Person,
   LocationOn,
@@ -254,7 +254,7 @@ const BookingCalendar = ({ vendor, onBookingComplete }) => {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ p: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Calendar />
+          <CalendarToday />
           Book with {vendor.businessName}
         </Typography>
 

@@ -53,7 +53,7 @@ import {
   Support,
   Award,
   Flash,
-  Crown,
+  WorkspacePremium,
   Diamond,
 } from '@mui/icons-material';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -116,7 +116,7 @@ const VendorMarketplace = () => {
     fast_response: { icon: <Speed />, color: 'success', label: 'Fast Response' },
     premium: { icon: <Diamond />, color: 'secondary', label: 'Premium' },
     trusted: { icon: <Security />, color: 'info', label: 'Trusted' },
-    featured: { icon: <Crown />, color: 'error', label: 'Featured' },
+    featured: { icon: <WorkspacePremium />, color: 'error', label: 'Featured' },
   };
 
   // Fetch vendors with filters
